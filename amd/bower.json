@@ -1,0 +1,20 @@
+{
+  "name": "capnp-js",
+  "version": "0.0.0",
+  "authors": [
+    "Tim Popham"
+  ],
+  "description": "Capnproto run-time decoding and encoding",
+  "main": "index.js",
+  "moduleType": [
+    "amd"
+  ],
+  "keywords": [
+    "capnproto"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/popham/capnp-js/",
+  "ignore": [
+    "**/.*"
+  ]
+}
