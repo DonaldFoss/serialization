@@ -16,5 +16,8 @@
   "homepage": "https://github.com/popham/capnp-js/",
   "ignore": [
     "**/.*"
-  ]
+  ],
+  "dependencies": {
+    "text-encoding": "~0.1.0"
+  }
 }
