@@ -1,5 +1,5 @@
 var primitives = require('../primitives');
-var layout = require('./primitives/layout');
+var layout = require('./primitive/layout');
 var deref = require('./deref');
     var Bools = function(list) {
         this.segments = list.segments;

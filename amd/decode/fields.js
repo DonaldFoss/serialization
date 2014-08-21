@@ -15,7 +15,7 @@ define([ "./primitives" ], function(primitives) {
         int32: function(defaultValue, bytes, position) {
             return primitives.int32(bytes, position) ^ defaultValue | 0;
         },
-        int64ish: function(defaultValue, bytes, position) {
+        int64: function(defaultValue, bytes, position) {
             /*
              * On widespread (u)int64 support, add a proper `int64` and an
              * annotation for targeting `int64`.
@@ -31,7 +31,7 @@ define([ "./primitives" ], function(primitives) {
         uint32: function(defaultValue, bytes, position) {
             return (primitives.uint32(bytes, position) ^ defaultValue) >>> 0;
         },
-        uint64ish: function(defaultValue, bytes, position) {
+        uint64: function(defaultValue, bytes, position) {
             /*
              * On widespread (u)int64 support, add a proper `uint64` and an
              * annotation for targeting `uint64`.

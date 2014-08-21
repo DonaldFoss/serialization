@@ -6,13 +6,13 @@ var primitives = require('../primitives');
      * * position UInt32 - Position of the pointer within `segment`.
      */
     var localLayout = function(segment, position) {
-        var half = primitives.int32(segment, position + 4) & 4294967292;
+        var half = primitives.int32(segment, position) & 4294967292;
         var data = position + 8 + half + half;
-        var pointers = data + (primitives.uint16(segment, position + 2) << 3);
+        var pointers = data + (primitives.uint16(segment, position + 4) << 3);
         return {
             dataSection: data,
             pointersSection: pointers,
-            end: pointers + (primitives.uint16(segment, position) << 3)
+            end: pointers + (primitives.uint16(segment, position + 6) << 3)
         };
     };
     /*
@@ -25,12 +25,12 @@ var primitives = require('../primitives');
      *   `segment`.
      */
     var doubleFarLayout = function(segment, position) {
-        var dataSection = primitives.uint32(segment, position + 4) & 4294967288;
-        var pointers = dataSection + (primitives.uint16(segment, position + 10) << 3);
+        var dataSection = primitives.uint32(segment, position) & 4294967288;
+        var pointers = dataSection + (primitives.uint16(segment, position + 12) << 3);
         return {
             dataSection: dataSection,
             pointersSection: pointers,
-            end: pointers + (primitives.uint16(segment, position + 8) << 3)
+            end: pointers + (primitives.uint16(segment, position + 14) << 3)
         };
     };
     /*
@@ -48,18 +48,17 @@ var primitives = require('../primitives');
      * within `segment`.
      */
     var intersegment = function(segments, segment, position) {
-        var nextSegment = segments[primitives.uint32(segment, position)];
-        var nextPosition = primitives.uint32(segment, position + 4) & 4294967288;
-        if (segment[position + 7] & 4) {
+        var nextSegment = segments[primitives.uint32(segment, position + 4)];
+        var nextPosition = primitives.uint32(segment, position) & 4294967288;
+        if (segment[position] & 4) {
             // Double hop
-            segment = segments[primitives.uint32(nextSegment, nextPosition)];
             var layout = doubleFarLayout(nextSegment, nextPosition);
             layout.segments = segments;
-            layout.segment = segment;
+            layout.segment = segments[primitives.uint32(nextSegment, nextPosition + 4)];
             return layout;
         } else {
             // Single hop
-            return intraSegment(segments, nextSegment, nextPosition);
+            return intrasegment(segments, nextSegment, nextPosition);
         }
     };
     module.exports = {

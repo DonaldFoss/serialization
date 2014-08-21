@@ -1,4 +1,4 @@
-var layout = require('./primitives/layout');
+var layout = require('./primitive/layout');
 var deref = require('./deref');
     var Voids = function(list) {
         this.segments = list.segments;

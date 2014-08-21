@@ -1,5 +1,5 @@
 var text = require('text-encoding');
-var layout = require('./primitives/layout');
+var layout = require('./primitive/layout');
 var deref = require('./deref');
     var decoder = new text.TextDecoder("utf-8");
     var Text = function(list) {
@@ -7,14 +7,16 @@ var deref = require('./deref');
         this.segment = list.segment;
         this.begin = list.begin;
         this.length = list.length;
+        console.log("Text begin:" + list.begin);
+        console.log("Text length:" + list.length);
     };
-    Text.prototype.raw = function() {
+    Text.prototype.asBytes = function() {
         return this.segment.subarray(this.begin, this.begin + this.length - 1);
     };
-    Text.prototype.string = function() {
-        return decoder.decode(this.raw);
+    Text.prototype.asString = function() {
+        return decoder.decode(this.asBytes());
     };
-    Text.prototype.rawNulled = function() {
+    Text.prototype.asBytesNull = function() {
         return this.segment.subarray(this.begin, this.begin + this.length);
     };
     Text.deref = deref(Text, layout);

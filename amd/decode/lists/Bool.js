@@ -1,4 +1,4 @@
-define([ "../primitives", "./primitives/layout", "./deref" ], function(primitives, layout, deref) {
+define([ "../primitives", "./primitive/layout", "./deref" ], function(primitives, layout, deref) {
     var Bools = function(list) {
         this.segments = list.segments;
         this.segment = list.segment;

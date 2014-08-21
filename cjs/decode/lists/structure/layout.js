@@ -1,5 +1,5 @@
 var primitives = require('../../primitives');
-var layout = require('../primitives/layout');
+var layout = require('../primitive/layout');
     var sizes = [ {
         data: 0,
         pointers: 0
@@ -26,17 +26,17 @@ var layout = require('../primitives/layout');
      * Compute the layout of a composite whose list has `tag` within `segment`.
      */
     var inlineLayout = function(segment, tag) {
-        var data = primitives.uint16(segment, tag + 2) << 3;
-        var pointers = primitives.uint16(segment, tag) << 3;
+        var data = primitives.uint16(segment, tag + 4) << 3;
+        var pointers = primitives.uint16(segment, tag + 6) << 3;
         return {
             begin: tag + 8,
-            length: primitives.uint32(segment, tag + 4) >>> 2,
+            length: primitives.uint32(segment, tag) >>> 2,
             dataBytes: data,
             pointersBytes: pointers
         };
     };
     /*
-     * Compute the layout of a non-composite starting at `begin` and with
+     * Compute the layout of a non-composite starting at `start` and with
      * `length` members.
      */
     var subwordLayout = function(start, size, length) {
@@ -54,9 +54,9 @@ var layout = require('../primitives/layout');
      * * position UInt32 - Position of the pointer within `segment`.
      */
     var localLayout = function(segment, position) {
-        var half = primitives.int32(segment, position + 4) & 4294967292;
+        var half = primitives.int32(segment, position) & 4294967292;
         var start = position + 8 + half + half;
-        var c = segment[position + 3] & 7;
+        var c = segment[position + 4] & 7;
         switch (c) {
           case 1:
             throw new Error("Single-bit structure packing is unsupported");
@@ -79,8 +79,8 @@ var layout = require('../primitives/layout');
      * * targetSegment Data - The final hop's data.
      */
     var doubleFarLayout = function(segment, position, targetSegment) {
-        var start = primitives.uint32(segment, position + 4) & 4294967288;
-        var c = segment[position + 11] & 7;
+        var start = primitives.uint32(segment, position) & 4294967288;
+        var c = segment[position + 12] & 7;
         switch (c) {
           case 1:
             throw new Error("Single-bit structure packing is unsupported");
@@ -99,19 +99,18 @@ var layout = require('../primitives/layout');
         return layout;
     };
     var intersegment = function(segments, segment, position) {
-        var nextSegment = segments[primitives.uint32(segment, position)];
-        var nextPosition = primitives.uint32(segment, position + 4) & 4294967288;
-        if (segment[position + 7] & 4) {
+        var nextSegment = segments[primitives.uint32(segment, position + 4)];
+        var nextPosition = primitives.uint32(segment, position) & 4294967288;
+        if (segment[position] & 4) {
             // Double hop
-            segment = segments[primitives.uint32(nextSegment, nextPosition)];
-            position = primitives.uint32(nextSegment, nextPosition + 4) & 4294967288;
+            segment = segments[primitives.uint32(nextSegment, nextPosition + 4)];
             var layout = doubleFarLayout(nextSegment, nextPosition, segment);
             layout.segments = segments;
             layout.segment = segment;
             return layout;
         } else {
             // Single hop
-            return intraSegment(segments, nextSegment, nextPosition);
+            return intrasegment(segments, nextSegment, nextPosition);
         }
     };
     module.exports = {

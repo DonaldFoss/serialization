@@ -8,9 +8,9 @@ var layout = require('./layout');
             this.end = structure.end;
         };
         Type.deref = function(segments, segment, position) {
-            if (segment[position + 7] & 3 === 0) {
+            if ((segment[position] & 3) === 0) {
                 return new Type(layout.intrasegment(segments, segment, position));
-            } else if (segment[position + 7] & 3 === 2) {
+            } else if ((segment[position] & 3) === 2) {
                 return new Type(layout.intersegment(segments, segment, position));
             } else {
                 throw new Error("Expected a Structure pointer");

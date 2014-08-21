@@ -1,4 +1,4 @@
-var layout = require('../primitives/layout');
+var layout = require('../primitive/layout');
     /*
      * Lists of dereferencable stuff, excluding structures.  E.g. Text, Data,
      * List(X), AnyPointer.
@@ -17,9 +17,9 @@ var layout = require('../primitives/layout');
             return Nonstruct.deref(this.segments, this.segment, this.begin + 8 * index);
         };
         Pointers.deref = function(segments, segment, position) {
-            if (segment[position + 7] & 3 === 1) {
+            if ((segment[position] & 3) === 1) {
                 return new Pointers(layout.intrasegment(segments, segment, position));
-            } else if (segment[position + 7] & 3 === 2) {
+            } else if ((segment[position] & 3) === 2) {
                 return new Pointers(layout.intersegment(segments, segment, position));
             } else {
                 throw new Error("Expected a List pointer");
