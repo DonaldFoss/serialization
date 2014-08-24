@@ -1,28 +1,34 @@
-define([ "./layout", "../deref" ], function(layout, deref) {
+define([ "./layout", "../deref", "../methods" ], function(layout, deref, m) {
     return function(Reader) {
         var Structs = function(list) {
-            this.segments = list.segments;
-            this.segment = list.segment;
-            this.begin = list.begin;
-            this.stride = list.dataBytes + list.pointersBytes;
-            this.length = list.length;
-            this.dataBytes = list.dataBytes;
-            this.pointersBytes = list.pointersBytes;
+            this._segments = list.segments;
+            this._segment = list.segment;
+            this._begin = list.begin;
+            this._stride = list.dataBytes + list.pointersBytes;
+            this._length = list.length;
+            this._dataBytes = list.dataBytes;
+            this._pointersBytes = list.pointersBytes;
         };
         Structs.prototype.get = function(index) {
-            if (index < 0 || this.length <= index) {
+            if (index < 0 || this._length <= index) {
                 throw new RangeError();
             }
-            var position = this.begin + this.stride * index;
-            var pointers = position + this.dataBytes;
+            var position = this._begin + this._stride * index;
+            var pointers = position + this._dataBytes;
             return new Reader({
-                segments: this.segments,
-                segment: this.segment,
+                segments: this._segments,
+                segment: this._segment,
                 dataSection: position,
                 pointersSection: pointers,
-                end: pointers + this.pointersBytes
+                end: pointers + this._pointersBytes
             });
         };
+        Structs.prototype.length = function() {
+            return this._length;
+        };
+        Structs.prototype.map = m.map;
+        Structs.prototype.forEach = m.forEach;
+        Structs.prototype.reduce = m.reduce;
         Structs.deref = deref(Structs, layout);
         return Structs;
     };

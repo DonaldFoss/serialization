@@ -43,7 +43,6 @@ var primitives = require('../../primitives');
     };
     var intrasegment = function(segments, segment, position) {
         var layout = localLayout(segment, position);
-        console.log("Intrasegment position:" + position);
         layout.segments = segments;
         layout.segment = segment;
         return layout;

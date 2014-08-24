@@ -1,10 +1,10 @@
 var primitives = require('./primitives');
     // Float conversion helpers
-    var buffer = new ArrayBuffer(4);
+    var buffer = new ArrayBuffer(8);
     var view = new DataView(buffer);
     module.exports = {
         bool: function(defaultValue, bytes, position, bitPosition) {
-            return primitives.bool(bytes, position, bitPosition) ^ defaultValue | 0;
+            return !!(primitives.bool(bytes, position, bitPosition) ^ defaultValue);
         },
         int8: function(defaultValue, bytes, position) {
             return primitives.int8(bytes, position) ^ defaultValue | 0;

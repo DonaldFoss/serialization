@@ -1,21 +1,27 @@
-define([ "../primitive/layout" ], function(layout) {
+define([ "../primitive/layout", "../methods" ], function(layout, m) {
     /*
      * Lists of dereferencable stuff, excluding structures.  E.g. Text, Data,
      * List(X), AnyPointer.
      */
     return function(Nonstruct) {
         var Pointers = function(list) {
-            this.segments = list.segments;
-            this.segment = list.segment;
-            this.begin = list.begin;
-            this.length = list.length;
+            this._segments = list.segments;
+            this._segment = list.segment;
+            this._begin = list.begin;
+            this._length = list.length;
         };
         Pointers.prototype.get = function(index) {
-            if (index < 0 || this.length <= index) {
+            if (index < 0 || this._length <= index) {
                 throw new RangeError();
             }
-            return Nonstruct.deref(this.segments, this.segment, this.begin + 8 * index);
+            return Nonstruct.deref(this._segments, this._segment, this._begin + 8 * index);
         };
+        Pointers.prototype.length = function() {
+            return this._length;
+        };
+        Pointers.prototype.map = m.map;
+        Pointers.prototype.forEach = m.forEach;
+        Pointers.prototype.reduce = m.reduce;
         Pointers.deref = function(segments, segment, position) {
             if ((segment[position] & 3) === 1) {
                 return new Pointers(layout.intrasegment(segments, segment, position));

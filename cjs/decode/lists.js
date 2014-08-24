@@ -3,44 +3,6 @@ var primitive = require('./lists/primitive/build');
 var structure = require('./lists/structure/build');
 var pointer = require('./lists/pointer/build');
 var types = require('./lists/types');
-    /*
-     * var TextList = pointer(Text);
-     * var list = TextList.deref(segments, segment, position);
-     * list.get(5); // => dereferences the text pointer at position 5, returning a Text instance.
-     *
-     * var WidgetList = structure(Widget);
-     * var list = WidgetList.deref(segments, segment, position);
-     * list.get(2); // => dereferences the widget pointer at position 2, returning a Widget instance.
-     *
-     * var WidgetList...List = list(list(list(structure(Widget))));
-     *
-     */
-    /*
-     * Method (pointer or struct) names the type that it accepts:
-     * `structure` must take struct readers
-     * `pointer` must take pointer readers (any type with a `deref` method).
-     * It returns a list that itself has a `deref` method, so it can be called recursively on any list.
-     */
-    /*
-    {
-        "name" : "nestedNodes",
-        "type" : {
-            "meta" : "list",
-            "type" : {
-                "meta" : "list",
-                "type" : {
-                    "meta" : "list",
-                    "type" : {
-                        "meta" : "struct",
-                        "id" : "16050641862814319170"
-                    }
-                }
-            }
-        },
-        "defaultBytes" : [[[[1,254,3,55],[3,54,22,4],...],[],[],[]],[[],[]],[[],[],[],[],[],[]]],
-        "offset" : 1
-    }
-    */
     module.exports = {
         structure: structure,
         pointer: pointer,

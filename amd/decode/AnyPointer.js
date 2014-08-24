@@ -1,11 +1,11 @@
 define([], function() {
     var Any = function(any) {
-        this.segments = any.segments;
-        this.segment = any.segment;
-        this.position = position;
+        this._segments = any.segments;
+        this._segment = any.segment;
+        this._position = any.position;
     };
     Any.prototype.cast = function(derefable) {
-        return derefable.deref(this.segments, this.segment, this.position);
+        return derefable.deref(this._segments, this._segment, this._position);
     };
     Any.deref = function(segments, segment, position) {
         return new Any({
