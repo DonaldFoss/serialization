@@ -9,6 +9,7 @@ define([ "./layout", "../deref", "../methods" ], function(layout, deref, m) {
             this._length = list.length;
             this._dataBytes = list.dataBytes;
             this._pointersBytes = list.pointersBytes;
+            arena.limiter.read(list.length * this._stride);
         };
         Structs.prototype.get = function(index) {
             if (index < 0 || this._length <= index) {
@@ -16,7 +17,12 @@ define([ "./layout", "../deref", "../methods" ], function(layout, deref, m) {
             }
             var position = this._begin + this._stride * index;
             var pointers = position + this._dataBytes;
-            return new Reader(arena, this._depth + 1, {
+            /*
+             * Do not apply the struct's memory to the traversal limit a second
+             * time.
+             */
+            this._arena.limiter.unread(this._stride);
+            return new Reader(this._arena, this._depth + 1, {
                 segment: this._segment,
                 dataSection: position,
                 pointersSection: pointers,
@@ -29,9 +35,6 @@ define([ "./layout", "../deref", "../methods" ], function(layout, deref, m) {
         Structs.prototype.map = m.map;
         Structs.prototype.forEach = m.forEach;
         Structs.prototype.reduce = m.reduce;
-        Structs.prototype._size = function() {
-            return this._length * this._stride;
-        };
         Structs.deref = deref(Structs, layout);
         return Structs;
     };

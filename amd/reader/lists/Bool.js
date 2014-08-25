@@ -5,6 +5,7 @@ define([ "../primitives", "./primitive/layout", "./deref", "./methods" ], functi
         this._segment = list.segment;
         this._begin = list.begin;
         this._length = list.length;
+        arena.limiter.read(Math.ceil(list.length / 8));
     };
     Bools.prototype.get = function(index) {
         if (index < 0 || this._length <= index) {
@@ -18,9 +19,6 @@ define([ "../primitives", "./primitive/layout", "./deref", "./methods" ], functi
     Bools.prototype.map = m.map;
     Bools.prototype.forEach = m.forEach;
     Bools.prototype.reduce = m.reduce;
-    Bools.prototype._size = function() {
-        return Math.ceil(this._length / 8);
-    };
     Bools.deref = deref(Bools, layout);
     return Bools;
 });

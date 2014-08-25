@@ -11,6 +11,7 @@ var m = require('../methods');
             this._segment = list.segment;
             this._begin = list.begin;
             this._length = list.length;
+            arena.limiter.read(list.length << 3);
         };
         Pointers.prototype.get = function(index) {
             if (index < 0 || this._length <= index) {
@@ -24,9 +25,6 @@ var m = require('../methods');
         Pointers.prototype.map = m.map;
         Pointers.prototype.forEach = m.forEach;
         Pointers.prototype.reduce = m.reduce;
-        Pointers.prototype._size = function() {
-            return this._length * 8;
-        };
         Pointers.deref = function(arena, depth, segment, position) {
             if ((segment[position] & 3) === 1) {
                 return new Pointers(arena, depth, layout.intrasegment(segment, position));

@@ -10,6 +10,7 @@ var m = require('../methods');
             this._begin = list.begin;
             this._stride = list.dataBytes;
             this._length = list.length;
+            arena.limiter.read(list.length * list.dataBytes);
         };
         Primitives.prototype.get = function(index) {
             if (index < 0 || this._length <= index) {
@@ -23,9 +24,6 @@ var m = require('../methods');
         Primitives.prototype.map = m.map;
         Primitives.prototype.forEach = m.forEach;
         Primitives.prototype.reduce = m.reduce;
-        Primitives.prototype._size = function() {
-            return this._length * this._stride;
-        };
         Primitives.deref = deref(Primitives, layout);
         return Primitives;
     };

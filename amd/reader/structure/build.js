@@ -7,9 +7,7 @@ define([ "./layout" ], function(layout) {
             this._dataSection = structure.dataSection;
             this._pointersSection = structure.pointersSection;
             this._end = structure.end;
-        };
-        Type.prototype._size = function() {
-            return this._end - this._dataSection;
+            arena.limiter.read(structure._end - structure._dataSection);
         };
         Type.deref = function(arena, depth, segment, position) {
             if ((segment[position] & 3) === 0) {

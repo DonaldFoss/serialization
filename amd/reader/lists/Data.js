@@ -5,6 +5,7 @@ define([ "./primitive/layout", "./deref" ], function(layout, deref) {
         this._segment = list.segment;
         this._begin = list.begin;
         this._length = list.length;
+        arena.limiter.read(list.length);
     };
     Data.prototype.get = function(index) {
         if (index < 0 || this._length <= index) {
@@ -14,9 +15,6 @@ define([ "./primitive/layout", "./deref" ], function(layout, deref) {
     };
     Data.prototype.raw = function() {
         return this._segment.subarray(this._begin, this._begin + this._length);
-    };
-    Data.prototype._size = function() {
-        return this._length;
     };
     Data.deref = deref(Data, layout);
     return Data;

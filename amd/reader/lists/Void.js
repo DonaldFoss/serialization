@@ -17,9 +17,6 @@ define([ "./primitive/layout", "./deref", "./methods" ], function(layout, deref,
     Voids.prototype.map = m.map;
     Voids.prototype.forEach = m.forEach;
     Voids.prototype.reduce = m.reduce;
-    Voids.prototype._size = function() {
-        return 0;
-    };
     Voids.deref = deref(Voids, layout);
     return Voids;
 });

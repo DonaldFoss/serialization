@@ -1,6 +1,5 @@
-define([ "./reader/index", "./builder/index", "./arena" ], function(reader, builder, arena) {
+define([ "./reader/index", "./builder/index" ], function(reader, builder) {
     return {
-        arena: arena,
         reader: reader,
         builder: builder
     };
