@@ -1,6 +1,8 @@
-var decode = require('./decode');
-var encode = require('./encode');
+var reader = require('./reader/index');
+var builder = require('./builder/index');
+var arena = require('./arena');
     module.exports = {
-        decode: decode,
-        encode: encode
+        arena: arena,
+        reader: reader,
+        builder: builder
     };

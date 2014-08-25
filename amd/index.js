@@ -1,6 +1,7 @@
-define([ "./decode", "./encode" ], function(decode, encode) {
+define([ "./reader/index", "./builder/index", "./arena" ], function(reader, builder, arena) {
     return {
-        decode: decode,
-        encode: encode
+        arena: arena,
+        reader: reader,
+        builder: builder
     };
 });
