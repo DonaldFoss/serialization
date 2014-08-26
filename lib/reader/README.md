@@ -1,0 +1,1 @@
+Given a pointer, `p` obtained by offset from another pointer: segment[p] !== undefined => segment[p+i] !== undefined \forall i \in [0,7] (by word alignment)
