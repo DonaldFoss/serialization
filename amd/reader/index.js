@@ -1,4 +1,4 @@
-define([ "./primitives", "./fields", "./structure", "./lists", "./AnyPointer", "./isNull" ], function(primitives, fields, structure, lists, AnyPointer, isNull) {
+define([ "./primitives", "./fields", "./structure", "./list/index", "./AnyPointer", "./isNull" ], function(primitives, fields, structure, lists, AnyPointer, isNull) {
     return {
         isNull: isNull,
         primitives: primitives,

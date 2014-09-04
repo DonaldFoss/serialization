@@ -6,8 +6,14 @@ define([ "./Limiter" ], function(Limiter) {
         this.limiter = new Limiter(maxBytes || 67108864);
         this._segments = segments;
     };
+    Reader.prototype.setMaxDepth = function(maxDepth) {
+        this.maxDepth = maxDepth;
+    };
+    Reader.prototype.setMaxBytes = function(maxBytes) {
+        this.limiter.maxBytes = maxBytes;
+    };
     Reader.prototype.getSegment = function(id) {
-        if (id >>> 0 >= this._segments.length) {
+        if (id >= this._segments.length) {
             throw new RangeError();
         }
         return this._segments[id];

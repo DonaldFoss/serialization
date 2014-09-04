@@ -1,7 +1,7 @@
 var primitives = require('./primitives');
 var fields = require('./fields');
 var structure = require('./structure');
-var lists = require('./lists');
+var lists = require('./list/index');
 var AnyPointer = require('./AnyPointer');
 var isNull = require('./isNull');
     module.exports = {
