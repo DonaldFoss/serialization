@@ -1,4 +1,4 @@
-define([ "../primitives", "./deref", "./methods" ], function(primitives, deref, m) {
+define([ "../primitives", "./deref", "./methods" ], function(primitives, deref, methods) {
     var Bools = function(arena, depth, list) {
         this._arena = arena;
         this._depth = depth;
@@ -10,6 +10,14 @@ define([ "../primitives", "./deref", "./methods" ], function(primitives, deref, 
         this._stride = list.dataBytes + list.pointersBytes;
         arena.limiter.read(list.segment, list.begin, Math.ceil(list.length / 8));
     };
+    Bools._CT = Bools.prototype._CT = {
+        meta: 1,
+        layout: 1,
+        dataBytes: null,
+        pointersBytes: null
+    };
+    Bools._TYPE = Bools.prototype._TYPE = {};
+    Bools.deref = deref(Bools);
     Bools.prototype.get = function(index) {
         if (index < 0 || this._length <= index) {
             throw new RangeError();
@@ -22,17 +30,9 @@ define([ "../primitives", "./deref", "./methods" ], function(primitives, deref, 
              * There exists a new version that has upgraded to non-single-bit
              * structures.
              */
-            return !!(this._segment[this._begin + index * this._stride] & 128);
+            return !!(this._segment[this._begin + index * this._stride] & 1);
         }
     };
-    Bools.prototype.length = function() {
-        return this._length;
-    };
-    Bools.prototype.map = m.map;
-    Bools.prototype.forEach = m.forEach;
-    Bools.prototype.reduce = m.reduce;
-    Bools.prototype._rt = m.rt;
-    Bools.prototype._layout = m.layout;
-    Bools.deref = deref(Bools);
+    methods.install(Bools.prototype);
     return Bools;
 });

@@ -1,4 +1,4 @@
-define([ "../primitives", "../list/sizes" ], function(primitives, sizes) {
+define([ "../primitives" ], function(primitives) {
     var bytes = [ {
         dataBytes: 0,
         pointersBytes: 0
@@ -27,19 +27,18 @@ define([ "../primitives", "../list/sizes" ], function(primitives, sizes) {
      * * tag Datum - A list's pointer.
      * * blob Datum - The blob corresponding to `tag`.
      *
-     * RETURNS: ListLayout
+     * * RETURNS: ListLayout
      */
     var layout = function(tag, blob) {
         var lo = primitives.uint32(tag.segment, tag.position + 4);
         var size = bytes[lo & 7];
         return {
-            type: 1,
+            meta: 1,
             segment: blob.segment,
             begin: blob.position,
             length: lo >>> 3,
             dataBytes: size.dataBytes,
-            pointersBytes: size.pointersBytes,
-            size: sizes[size.dataBytes][size.pointersBytes]
+            pointersBytes: size.pointersBytes
         };
     };
     /*
@@ -48,7 +47,7 @@ define([ "../primitives", "../list/sizes" ], function(primitives, sizes) {
      *
      * * pointer Datum - Position of the intrasegment list pointer.
      *
-     * RETURNS: ListLayout
+     * * RETURNS: ListLayout
      */
     var intrasegment = function(pointer) {
         var half = primitives.int32(pointer.segment, pointer.position) & 4294967292;
@@ -65,7 +64,7 @@ define([ "../primitives", "../list/sizes" ], function(primitives, sizes) {
      * * tag Datum - The far pointer's tag word.
      * * blob Datum - The list's blob.
      *
-     * RETURNS: ListLayout
+     * * RETURNS: ListLayout
      */
     var intersegment = function(tag, blob) {
         return layout(tag, blob);

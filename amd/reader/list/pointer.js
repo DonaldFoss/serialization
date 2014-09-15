@@ -1,4 +1,4 @@
-define([ "./deref", "./methods" ], function(deref, m) {
+define([ "./deref", "./methods" ], function(deref, methods) {
     /*
      * Lists of dereferencable stuff, excluding structures.  E.g. Text, Data,
      * List(X), AnyPointer.
@@ -15,27 +15,26 @@ define([ "./deref", "./methods" ], function(deref, m) {
             this._length = list.length;
             this._dataBytes = list.dataBytes;
             this._pointersBytes = list.pointersBytes;
-            this._first = this._begin + this._dataBytes;
             this._stride = this._dataBytes + this._pointersBytes;
             arena.limiter.read(list.segment, list.begin, list.length << 3);
         };
+        Pointers._CT = Pointers.prototype._CT = {
+            meta: 1,
+            layout: 6,
+            dataBytes: 0,
+            pointersBytes: 8
+        };
+        Pointers.deref = deref(Pointers);
         Pointers.prototype.get = function(index) {
             if (index < 0 || this._length <= index) {
                 throw new RangeError();
             }
             return Nonstruct.deref(this._arena, {
                 segment: this._segment,
-                position: this._first + index * this._stride
+                position: this._begin + this._dataBytes + index * this._stride
             }, this._depth + 1);
         };
-        Pointers.prototype.length = function() {
-            return this._length;
-        };
-        Pointers.prototype.map = m.map;
-        Pointers.prototype.forEach = m.forEach;
-        Pointers.prototype.reduce = m.reduce;
-        Pointers.prototype._rt = m.rt;
-        Pointers.prototype._layout = m.layout;
-        Pointers.deref = deref(Pointers);
+        methods.install(Pointers.prototype);
+        return Pointers;
     };
 });

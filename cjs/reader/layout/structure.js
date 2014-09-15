@@ -34,7 +34,7 @@ var unsafe = require('./unsafe');
     var layout = function(tag, blob) {
         var pointers = blob.position + dataBytes(tag);
         return {
-            type: 0,
+            meta: 0,
             segment: blob.segment,
             dataSection: blob.position,
             pointersSection: pointers,

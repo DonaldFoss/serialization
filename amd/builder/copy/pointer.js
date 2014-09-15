@@ -1,4 +1,4 @@
-define([ "./deep" ], function(_deep) {
+define([ "./deep", "../zero" ], function(_deep, zero) {
     var setPointer = {
         0: _deep.setStructurePointer,
         1: _deep.setListPointer
@@ -17,13 +17,10 @@ define([ "./deep" ], function(_deep) {
      *   the copied data.
      */
     var deep = function(reader, arena, target) {
-        /*
-         * Zero the pointer so that failure results in a nulled pointer.  Upon
-         * failure, copying will clean up any garbage.
-         */
-        arena._zero(target.segment, 8);
+        // Zero the target pointer's branch prior to orphaning it.
+        zero.pointer(arena, target);
         var layout = reader._layout();
-        setPointer[layout.type](reader._arena, layout, arena, target);
+        setPointer[layout.meta](reader._arena, layout, arena, target);
         return target;
     };
     /*
@@ -33,9 +30,11 @@ define([ "./deep" ], function(_deep) {
      * * pointer Datum - Location of the pointer to set.
      *
      * * RETURNS: Datum - The provided pointer location that now dereferences to
-     * the previously orphaned data.
+     *   the previously orphaned data.
      */
     var shallow = function(orphan, pointer) {
+        // Zero the target pointer's branch prior to orphaning it.
+        zero.pointer(orphan._arena, pointer);
         var layout = orphan._layout();
         var blob;
         var rt = orphan._rt();
@@ -54,14 +53,15 @@ define([ "./deep" ], function(_deep) {
                 position: layout.begin
             };
             // Include the tag word in the blob.
-            if (rt.size === 7) {
+            if (rt.layout === 7) {
                 blob.position -= 8;
             }
-            list.nonpreallocated(orphan._arena, pointer, blob, rt);
+            list.nonpreallocated(orphan._arena, pointer, blob, rt, layout.length);
             return pointer;
         }
     };
     return {
+        any: _deep.setAnyPointer,
         deep: deep,
         shallow: shallow
     };

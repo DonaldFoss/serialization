@@ -1,6 +1,6 @@
 var deref = require('./deref');
-var m = require('./methods');
-    module.exports = function(Reader) {
+var methods = require('./methods');
+    module.exports = function(Reader, ct) {
         var Structs = function(arena, depth, list) {
             if (depth > arena.maxDepth) {
                 throw new Error("Exceeded nesting depth limit");
@@ -18,6 +18,8 @@ var m = require('./methods');
             this._stride = list.dataBytes + list.pointersBytes;
             arena.limiter.read(list.segment, list.begin, this._stride * list.length);
         };
+        Structs._CT = Structs.prototype._CT = ct;
+        Structs.deref = deref(Structs);
         Structs.prototype.get = function(index) {
             if (index < 0 || this._length <= index) {
                 throw new RangeError();
@@ -30,20 +32,13 @@ var m = require('./methods');
              */
             this._arena.limiter.unread(this._stride);
             return new Reader(this._arena, this._depth + 1, {
+                meta: 0,
                 segment: this._segment,
                 dataSection: position,
                 pointersSection: pointers,
                 end: pointers + this._pointersBytes
             });
         };
-        Structs.prototype.length = function() {
-            return this._length;
-        };
-        Structs.prototype.map = m.map;
-        Structs.prototype.forEach = m.forEach;
-        Structs.prototype.reduce = m.reduce;
-        Structs.prototype._rt = m.rt;
-        Structs.prototype._layout = m.layout;
-        Structs.deref = deref(Structs);
+        methods.install(Structs.prototype);
         return Structs;
     };

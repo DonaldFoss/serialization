@@ -9,13 +9,12 @@ var structure = require('./structure');
      */
     var inlineLayout = function(blob) {
         return {
-            type: 1,
+            meta: 1,
             segment: blob.segment,
             begin: blob.position + 8,
             length: primitives.uint32(blob.segment, blob.position) >>> 2,
             dataBytes: structure.dataBytes(blob),
-            pointersBytes: structure.pointersBytes(blob),
-            size: 7
+            pointersBytes: structure.pointersBytes(blob)
         };
     };
     /*

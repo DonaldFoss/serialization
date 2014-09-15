@@ -7,6 +7,9 @@ define([], function() {
         return nChr > 64 && nChr < 91 ? nChr - 65 : nChr > 96 && nChr < 123 ? nChr - 71 : nChr > 47 && nChr < 58 ? nChr + 4 : nChr === 43 ? 62 : nChr === 47 ? 63 : 0;
     };
     return function(sBase64) {
+        sBase64 = sBase64.trim();
+        var end = sBase64.indexOf("=");
+        if (end >= 0) sBase64 = sBase64.slice(0, end);
         var nInLen = sBase64.length;
         var nOutLen = nInLen * 3 + 1 >> 2;
         var taBytes = new Uint8Array(nOutLen);

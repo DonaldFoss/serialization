@@ -1,7 +1,7 @@
-var any = require('../reader/layouts/any');
-var sizes = require('../reader/list/sizes');
-var structure = require('./layout/structure');
-var list = require('./layout/list');
+var any = require('../../reader/layout/any');
+var meta = require('../../reader/list/meta');
+var structure = require('../layout/structure');
+var layout = require('../layout/list');
     /*
      * Copy a structure to a blob of memory.
      *
@@ -22,9 +22,12 @@ var list = require('./layout/list');
             segment: blob.segment,
             position: blob.position
         };
-        var dataSize = layout.pointersSection - layout.dataSection;
-        arena._write(source, dataSize, target);
-        target.position += dataSize;
+        // Copy the data section verbatim.
+        var dataLength = layout.pointersSection - layout.dataSection;
+        targetArena._write(source, dataLength, target);
+        // Deep copy the pointers section.
+        source.position += dataLength;
+        target.position += dataLength;
         for (;source.position < layout.end; source.position += 8, target.position += 8) {
             copy(arena, source, targetArena, target);
         }
@@ -44,6 +47,7 @@ var list = require('./layout/list');
         var blob = targetArena._preallocate(target.segment, layout.end - layout.dataSection);
         setStructure(arena, layout, targetArena, blob);
         structure.preallocated(target, blob, {
+            meta: 0,
             dataBytes: layout.pointersSection - layout.dataSection,
             pointersBytes: layout.end - layout.pointersSection
         });
@@ -70,7 +74,7 @@ var list = require('./layout/list');
             position: blob.position
         };
         for (var i = 0; i < layout.length; ++i) {
-            var end = source.position + 8 * layout.pointersBytes;
+            var end = source.position + layout.pointersBytes;
             // Skip the data section.
             source.position += layout.dataBytes;
             target.position += layout.dataBytes;
@@ -86,19 +90,32 @@ var list = require('./layout/list');
      * `layout.segment` within `arena`.
      *
      * arena Arena - The source list's arena.
-     * layout ListLayout - Stripped reader data describing the list to be
-     * copied.
+     * meta ListMeta - Metadata describing the pointer to be copied.
+     * layout ListLayout - Reader data describing the list to be copied.
      * targetArena BuilderArena - The arena where the copied list will be
      * written.
      * blob Datum - The location within `targetArena` to begin writing the list.
      * size UInt32 - The size of each list element in bytes.
      */
-    var setListVerbatim = function(arena, layout, targetArena, blob, size) {
+    var setListVerbatim = function(arena, meta, layout, targetArena, blob) {
+        var bytes;
         var source = {
             segment: layout.segment,
             position: layout.begin
         };
-        arena._write(source, layout.length * size, blob);
+        if (meta.layout === 1) {
+            bytes = layout.length >>> 3;
+            var remainder = layout.length & 7;
+            if (remainder) {
+                // Clobber any junk on the tail of the source in preparation for
+                // copying.
+                source.segment[source.position + bytes] &= 255 >>> 8 - remainder;
+                bytes += remainder ? 1 : 0;
+            }
+        } else {
+            bytes = layout.length * (layout.dataBytes + layout.pointersBytes);
+        }
+        targetArena._write(source, bytes, blob);
     };
     /*
      * Copy a list to a blob of memory.
@@ -109,17 +126,16 @@ var list = require('./layout/list');
      * targetArena BuilderArena - The arena where the copied list will be
      * written.
      * blob Datum - The location within `targetArena` to begin writing the list.
-     * size UInt32 - The size of each list element in bytes.
      */
-    var setList = function(arena, layout, targetArena, blob, size) {
+    var setList = function(arena, layout, targetArena, blob) {
         var data;
-        if (layout.size === 7) {
+        var m = meta(layout);
+        if (m.layout === 7) {
             // Copy the tag word.
-            var tag = {
+            targetArena._write({
                 segment: layout.segment,
                 position: layout.begin - 8
-            };
-            targetArena._write(tag, 8, blob);
+            }, 8, blob);
             data = {
                 segment: blob.segment,
                 position: blob.position + 8
@@ -127,10 +143,10 @@ var list = require('./layout/list');
         } else {
             data = blob;
         }
-        if (layout.dataSection !== 0) {
-            setListVerbatim(arena, layout, targetArena, data, size);
+        if (layout.dataBytes !== 0) {
+            setListVerbatim(arena, m, layout, targetArena, data);
         }
-        if (layout.pointerSection !== 0) {
+        if (layout.pointersBytes !== 0) {
             /*
              * Overwrite verbatim pointer copies with deep copies.  Since the
              * copying must succeed before linking into an internal data
@@ -145,41 +161,36 @@ var list = require('./layout/list');
      * Copy a list to a blob of memory and direct a pointer to it.
      *
      * arena Arena - The source list's arena.
-     * layout ListLayout - Stripped reader data describing the list to be
-     * copied.
+     * ell ListLayout - Stripped reader data describing the list to be copied.
      * targetArena BuilderArena - The arena where the copied list will be
      * written.
      * target Datum - The location within `targetArena` to write a pointer that
      * dereferences to the copied list.
      */
-    var setListPointer = function(arena, layout, targetArena, target) {
-        var size = layout.dataBytes + layout.pointersBytes;
-        var meta = {
-            dataBytes: layout.dataBytes,
-            pointersBytes: layout.pointersBytes,
-            size: layout.size,
-            length: layout.length
-        };
+    var setListPointer = function(arena, ell, targetArena, target) {
+        var m = meta(ell);
         var blob;
-        if (meta.size === 7) {
+        if (m.layout === 1) {
+            blob = targetArena._preallocate(target.segment, (ell.length >>> 3) + (ell.length & 7 ? 1 : 0));
+        } else if (m.layout === 7) {
             // Add an extra 8 bytes for the tag word.
-            blob = arena._preallocate(target.segment, 8 + layout.length * size);
-        } else if (meta.size === 1) {
-            blob = arena._preallocate(target.segment, layout.length >>> 3 + (layout.length & 7 ? 1 : 0));
+            blob = targetArena._preallocate(target.segment, 8 + ell.length * (ell.dataBytes + ell.pointersBytes));
         } else {
-            blob = arena._preallocate(target.segment, layout.length * size);
+            blob = targetArena._preallocate(target.segment, ell.length * (ell.dataBytes + ell.pointersBytes));
         }
-        setList(arena, layout, targetArena, blob, size);
-        list.preallocated(target, blob, meta);
+        setList(arena, ell, targetArena, blob);
+        layout.preallocated(target, blob, m, ell.length);
     };
     /*
      * Deep copy the `source` datum's pointer to the `target` datum.
      *
-     * arena ReaderArena - Arena that contains the source data.
-     * source Datum - Position of a pointer within `arena`.
-     * targetArena BuilderArena - Arena that the data will be copied into.
-     * target Datum - Position of the pointer within arena that should
-     * dereference to the data's copy.
+     * * arena ReaderArena - Arena that contains the source data.
+     * * source Datum - Position of a pointer within `arena`.
+     * * targetArena BuilderArena - Arena that the data will be copied into.
+     * * target Datum - Position of the pointer within arena that should
+     * * dereference to the data's copy.
+     *
+     * * RETURNS: Datum - Root of the branch that was copied.
      */
     var copy = function(arena, source, targetArena, target) {
         var layout = any.safe(arena, source);
@@ -197,6 +208,7 @@ var list = require('./layout/list');
     module.exports = {
         setStructurePointer: setStructurePointer,
         setListPointer: setListPointer,
+        setAnyPointer: copy,
         setStructure: setStructure,
         setList: setList
     };

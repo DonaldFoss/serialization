@@ -6,19 +6,18 @@ var far = require('../far');
         pointer.segment[pointer.position + 7] = pointers >>> 8;
     };
     var intrasegment = function(pointer, blob, meta) {
-        /* Non-bitshift to avoid possible sign-bit truncation. */
-        var offset = (blob.position - pointer.position + 8) / 8;
+        // Non-bitshift to avoid possible sign-bit truncation.
+        var offset = (blob.position - pointer.position - 8) / 8;
         pointer.segment[pointer.position] = offset << 2;
-        /* A bits for free. */
+        // A bits for free.
         pointer.segment[pointer.position + 1] = offset >>> 6;
         pointer.segment[pointer.position + 2] = offset >>> 14;
         pointer.segment[pointer.position + 3] = offset >>> 22;
         wordCounts(pointer, meta.dataBytes >>> 3, meta.pointersBytes >>> 3);
     };
-    /* Preallocated blob includes an extra 8 bytes at its head for far pointer landing */
     var preallocated = function(pointer, blob, meta) {
         if (pointer.segment === blob.segment) {
-            intrasegment(pointer, blob, layout);
+            intrasegment(pointer, blob, meta);
         } else {
             // `offset` and `A` bits of zero by construction.
             var land = {

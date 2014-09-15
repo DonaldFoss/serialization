@@ -22,10 +22,17 @@ define([ "./deep" ], function(deep) {
             var rt = reader._rt();
             var size = layout.dataBytes + layout.pointersBytes;
             var length = layout.length;
-            // Use an additional 8 bytes if a tag word exists.
-            var bytes = rt.size === 7 ? 8 + length * size : length * size;
+            var bytes;
+            if (rt.layout === 1) {
+                bytes = length >>> 8;
+                if (length & 7) ++bytes;
+            } else if (rt.layout === 7) {
+                bytes = 8 + length * (layout.dataBytes + layout.pointersBytes);
+            } else {
+                bytes = length * (layout.dataBytes + layout.pointersBytes);
+            }
             blob = arena._allocate(bytes);
-            deep.setList(reader._arena, layout, arena, blob, size);
+            deep.setList(reader._arena, layout, arena, blob);
             return blob;
 
           default:

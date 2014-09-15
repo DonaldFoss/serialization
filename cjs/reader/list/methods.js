@@ -1,4 +1,7 @@
 var sizes = require('./sizes');
+    var length = function() {
+        return this._length;
+    };
     var map = function(fn) {
         var arr = [];
         for (var i = 0; i < this._length; ++i) {
@@ -26,22 +29,24 @@ var sizes = require('./sizes');
         return acc;
     };
     var rt = function() {
-        var runtime = {
-            dataBytes: this._dataBytes,
-            pointersBytes: this._pointersBytes,
-            length: this._length
-        };
+        var layout;
         if (this._dataBytes === null) {
-            runtime.size = 1;
+            layout = 1;
         } else if (this._dataBytes + this._pointersBytes > 8) {
-            runtime.size = 7;
+            layout = 7;
         } else {
-            runtime.size = sizes[this._dataBytes][this._pointersBytes];
+            layout = sizes[this._dataBytes][this._pointersBytes];
         }
-        return runtime;
+        return {
+            meta: 1,
+            layout: layout,
+            dataBytes: this._dataBytes,
+            pointersBytes: this._pointersBytes
+        };
     };
     var layout = function() {
         return {
+            meta: 1,
             segment: this._segment,
             begin: this._begin,
             length: this._length,
@@ -49,10 +54,20 @@ var sizes = require('./sizes');
             pointersBytes: this._pointersBytes
         };
     };
+    var install = function(target) {
+        target.length = length;
+        target.map = map;
+        target.forEach = forEach;
+        target.reduce = reduce;
+        target._rt = rt;
+        target._layout = layout;
+    };
     module.exports = {
+        length: length,
         map: map,
         forEach: forEach,
         reduce: reduce,
         rt: rt,
-        layout: layout
+        layout: layout,
+        install: install
     };
