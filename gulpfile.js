@@ -1,6 +1,5 @@
 var gulp = require('gulp');
 
-var clean = require('gulp-rimraf');
 var jshint = require('gulp-jshint');
 var nodefy = require('gulp-nodefy');
 var uglify_ = require('gulp-uglify');
@@ -15,11 +14,6 @@ var optimal = {};
 var uglify = function () { return uglify_(pretty); };
 
 gulp.task('build', ['amd', 'cjs', 'manage']);
-
-gulp.task('clean', function () {
-    return gulp.src(['amd', 'cjs'], { read : false })
-        .pipe(clean());
-});
 
 gulp.task('manage', ['bower', 'npm']);
 
