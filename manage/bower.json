@@ -4,7 +4,7 @@
   "authors": [
     "Tim Popham"
   ],
-  "description": "Capnproto run-time decoding and encoding",
+  "description": "Capnproto run-time decoding and encoding for AMD",
   "main": "index.js",
   "moduleType": [
     "amd"
@@ -13,7 +13,7 @@
     "capnproto"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/popham/capnp-js/",
+  "homepage": "https://github.com/popham/capnp-js-amd/",
   "ignore": [
     "**/.*"
   ],

@@ -30,7 +30,7 @@ gulp.task('bower', function () {
 
 gulp.task('npm', function () {
     return gulp.src('manage/package.json')
-        .pipe(gulp.dest('cjs'));
+        .pipe(gulp.dest('node'));
 });
 
 gulp.task('amd', function () {
@@ -47,5 +47,5 @@ gulp.task('cjs', function () {
         .pipe(jshint())
         .pipe(jshint.reporter('default'))
         .pipe(nodefy())
-        .pipe(gulp.dest('cjs'));
+        .pipe(gulp.dest('node'));
 });

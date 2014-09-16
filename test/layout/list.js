@@ -1,5 +1,5 @@
 var assert = require('assert');
-var layout = require('../../cjs/decode/lists/primitive/layout');
+var layout = require('../../node/reader/layout/list');
 
 var intra = new Uint8Array([0x01 | 0x1a, 0xab, 0x2e, 0x1b,
                             0x04 | 0xe8, 0x11, 0x32, 0x1c]);

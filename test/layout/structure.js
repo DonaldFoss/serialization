@@ -1,5 +1,37 @@
 var assert = require('assert');
-var layout = require('../../cjs/decode/structure/layout');
+var layout = require('../../node/reader/layout/structure');
+
+UNIT TEST
+deep copy local
+deep copy far
+*
+inline composite list
+tagless list
+structure with data and pointers
+
+Trace all pointers, validating that data sections match
+
+DECODING
+id from both sides
+custom message --capnpc-tool--> binary --deep-copy--> binary --dump--> json
+custom message --capnpc-tool--> json
+json diff for test
+
+ENCODING
+[{
+    field : 'someFieldName',
+    value : '4.38'
+}, {
+    field : 'someOtherFieldName',
+    value : '-1343'
+}]
+->
+builder[setSomeFieldName](4.38);
+builder[setSomeOtherFieldName](-1343);
+--capnp-decode-->
+text
+--peg-js-->
+json
 
 var intra = new Uint8Array([0x00 | 0x1a, 0xab, 0x2e, 0x1b,
                                    0xa1, 0x11, 0x32, 0x1c]);
