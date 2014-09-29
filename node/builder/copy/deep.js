@@ -1,5 +1,6 @@
 var any = require('../../reader/layout/any');
 var meta = require('../../reader/list/meta');
+var isNull = require('../../reader/isNull');
 var structure = require('../layout/structure');
 var layout = require('../layout/list');
     /*
@@ -110,7 +111,7 @@ var layout = require('../layout/list');
                 // Clobber any junk on the tail of the source in preparation for
                 // copying.
                 source.segment[source.position + bytes] &= 255 >>> 8 - remainder;
-                bytes += remainder ? 1 : 0;
+                bytes += 1;
             }
         } else {
             bytes = layout.length * (layout.dataBytes + layout.pointersBytes);
@@ -193,15 +194,19 @@ var layout = require('../layout/list');
      * * RETURNS: Datum - Root of the branch that was copied.
      */
     var copy = function(arena, source, targetArena, target) {
-        var layout = any.safe(arena, source);
-        switch (layout.type) {
-          case 0:
-            setStructurePointer(arena, layout, targetArena, target);
-            break;
+        if (!isNull(source)) {
+            var layout = any.safe(arena, source);
+            switch (layout.meta) {
+              case 0:
+                setStructurePointer(arena, layout, targetArena, target);
+                break;
 
-          case 1:
-            setListPointer(arena, layout, targetArena, target);
-            break;
+              case 1:
+                setListPointer(arena, layout, targetArena, target);
+                break;
+            }
+        } else {
+            targetArena._zero(target, 8);
         }
         return target;
     };

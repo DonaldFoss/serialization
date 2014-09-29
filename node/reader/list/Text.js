@@ -1,7 +1,6 @@
 var text = require('text-encoding');
 var deref = require('./deref');
 var methods = require('./methods');
-    var decoder = new text.TextDecoder("utf-8");
     var Text = function(arena, depth, list) {
         this._arena = arena;
         this._depth = depth;
@@ -19,15 +18,15 @@ var methods = require('./methods');
         pointersBytes: 0
     };
     Text._TYPE = Text.prototype._TYPE = {};
-    Text.deref = deref(Text);
+    Text._deref = deref(Text);
+    Text.prototype.asBytesNull = function() {
+        return this._segment.slice(this._begin, this._begin + this._length);
+    };
     Text.prototype.asBytes = function() {
-        return this._segment.subarray(this._begin, this._begin + this._length - 1);
+        return this._segment.slice(this._begin, this._begin + this._length - 1);
     };
     Text.prototype.asString = function() {
-        return decoder.decode(this.asBytes());
-    };
-    Text.prototype.asBytesNull = function() {
-        return this._segment.subarray(this._begin, this._begin + this._length);
+        return this._segment.toString("utf8", this._begin, this._begin + this._length - 1);
     };
     Text.prototype._rt = methods.rt;
     Text.prototype._layout = methods.layout;

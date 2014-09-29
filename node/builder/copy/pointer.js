@@ -1,5 +1,4 @@
 var _deep = require('./deep');
-var zero = require('../zero');
     var setPointer = {
         0: _deep.setStructurePointer,
         1: _deep.setListPointer
@@ -18,8 +17,6 @@ var zero = require('../zero');
      *   the copied data.
      */
     var deep = function(reader, arena, target) {
-        // Zero the target pointer's branch prior to orphaning it.
-        zero.pointer(arena, target);
         var layout = reader._layout();
         setPointer[layout.meta](reader._arena, layout, arena, target);
         return target;
@@ -34,12 +31,10 @@ var zero = require('../zero');
      *   the previously orphaned data.
      */
     var shallow = function(orphan, pointer) {
-        // Zero the target pointer's branch prior to orphaning it.
-        zero.pointer(orphan._arena, pointer);
         var layout = orphan._layout();
         var blob;
         var rt = orphan._rt();
-        switch (layout.type) {
+        switch (layout.meta) {
           case 0:
             blob = {
                 segment: layout.segment,

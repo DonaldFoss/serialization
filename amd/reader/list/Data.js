@@ -16,7 +16,7 @@ define([ "./deref", "./methods" ], function(deref, methods) {
         pointersBytes: 0
     };
     Data._TYPE = Data.prototype._TYPE = {};
-    Data.deref = deref(Data);
+    Data._deref = deref(Data);
     Data.prototype.get = function(index) {
         if (index < 0 || this._length <= index) {
             throw new RangeError();

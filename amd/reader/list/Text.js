@@ -17,15 +17,15 @@ define([ "text-encoding", "./deref", "./methods" ], function(text, deref, method
         pointersBytes: 0
     };
     Text._TYPE = Text.prototype._TYPE = {};
-    Text.deref = deref(Text);
+    Text._deref = deref(Text);
+    Text.prototype.asBytesNull = function() {
+        return this._segment.subarray(this._begin, this._begin + this._length);
+    };
     Text.prototype.asBytes = function() {
         return this._segment.subarray(this._begin, this._begin + this._length - 1);
     };
     Text.prototype.asString = function() {
         return decoder.decode(this.asBytes());
-    };
-    Text.prototype.asBytesNull = function() {
-        return this._segment.subarray(this._begin, this._begin + this._length);
     };
     Text.prototype._rt = methods.rt;
     Text.prototype._layout = methods.layout;

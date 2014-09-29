@@ -17,7 +17,7 @@ var methods = require('./methods');
         pointersBytes: 0
     };
     Data._TYPE = Data.prototype._TYPE = {};
-    Data.deref = deref(Data);
+    Data._deref = deref(Data);
     Data.prototype.get = function(index) {
         if (index < 0 || this._length <= index) {
             throw new RangeError();
@@ -25,7 +25,7 @@ var methods = require('./methods');
         return this._segment[this._begin + index];
     };
     Data.prototype.raw = function() {
-        return this._segment.subarray(this._begin, this._begin + this._length);
+        return this._segment.slice(this._begin, this._begin + this._length);
     };
     methods.install(Data.prototype);
     module.exports = Data;

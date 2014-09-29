@@ -59,8 +59,6 @@ var sizes = require('./sizes');
         target.map = map;
         target.forEach = forEach;
         target.reduce = reduce;
-        target._rt = rt;
-        target._layout = layout;
     };
     module.exports = {
         length: length,

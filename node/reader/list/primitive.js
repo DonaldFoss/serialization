@@ -1,6 +1,8 @@
+var type = require('../../type');
 var deref = require('./deref');
 var methods = require('./methods');
     module.exports = function(decoder, ct) {
+        var t = new type.Terminal();
         var Primitives = function(arena, depth, list) {
             this._arena = arena;
             this._depth = depth;
@@ -12,9 +14,15 @@ var methods = require('./methods');
             this._stride = list.dataBytes + list.pointersBytes;
             arena.limiter.read(list.segment, list.begin, list.dataBytes * list.length);
         };
+        Primitives._TYPE = t;
         Primitives._CT = Primitives.prototype._CT = ct;
-        Primitives._TYPE = Primitives.prototype._TYPE = {};
-        Primitives.deref = deref(Primitives);
+        Primitives._deref = deref(Primitives);
+        Primitives.prototype = {
+            _TYPE: t,
+            _CT: ct,
+            _rt: methods.rt,
+            _layout: methods.layout
+        };
         Primitives.prototype.get = function(index) {
             if (index < 0 || this._length <= index) {
                 throw new RangeError();

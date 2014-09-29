@@ -1,5 +1,13 @@
+var type = require('../../type');
 var deref = require('./deref');
 var methods = require('./methods');
+    var t = new type.Terminal();
+    var ct = {
+        meta: 1,
+        layout: 0,
+        dataBytes: 0,
+        pointersBytes: 0
+    };
     var Voids = function(arena, depth, list) {
         this._arena = arena;
         this._depth = depth;
@@ -16,14 +24,15 @@ var methods = require('./methods');
         this._pointersBytes = 0;
         this._stride = 0;
     };
-    Voids._CT = Voids.prototype._CT = {
-        meta: 1,
-        layout: 0,
-        dataBytes: 0,
-        pointersBytes: 0
+    Voids._TYPE = t;
+    Voids._CT = ct;
+    Voids._deref = deref(Voids);
+    Voids.prototype = {
+        _TYPE: t,
+        _CT: ct,
+        _rt: methods.rt,
+        _layout: methods.layout
     };
-    Voids._TYPE = Voids.prototype._TYPE = {};
-    Voids.deref = deref(Voids);
     Voids.prototype.get = function(index) {
         if (index < 0 || this._length <= index) {
             throw new RangeError();
