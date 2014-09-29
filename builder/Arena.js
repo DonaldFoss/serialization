@@ -1,13 +1,10 @@
+var isNull = require('../reader/isNull');
 var Reader = require('../reader/Arena');
 var reader = require('../reader/layout/structure');
 var wordAlign = require('../wordAlign');
-var builder = require('./layout/structure');
 var copy = require('./copy/index');
+var builder = require('./layout/structure');
 var upgrade = require('./upgrade');
-    /* Require to initialize everything to zero:
-     * * A union's discriminant isn't explicitly zeroed.
-     * * Upgrading assumes that transfered data is overwriting zeros, leaving untouched allocation at default values
-     */
     var Builder = function(alloc, zero, size) {
         if (size < 8) size = 8;
         this.__alloc = alloc;
@@ -24,32 +21,44 @@ var upgrade = require('./upgrade');
         return this._segments[id];
     };
     Builder.prototype.asReader = function(maxDepth, maxBytes) {
-        if (maxDepth === undefined) maxDepth = Infinity;
-        if (maxBytes === undefined) maxBytes = Infinity;
+        if (maxDepth === undefined) maxDepth = +Infinity;
+        if (maxBytes === undefined) maxBytes = +Infinity;
         return new Reader(this._segments, maxDepth, maxBytes);
     };
     Builder.prototype.initRoot = function(Structure) {
-        return this.getRoot(Structure);
+        var ctSize = Structure._CT.dataBytes + Structure._CT.pointersBytes;
+        var root = this._root();
+        var blob = this._preallocate(root.segment, ctSize);
+        this._zero(blob, ctSize);
+        builder.preallocated(root, blob, Structure._CT);
+        return Structure._deref(this, root);
     };
     Builder.prototype.initOrphan = function(Type) {
         /*
          * Only builders expose `initOrphan`, so providing a reader will error
          * out, as it should.
          */
-        return Type.initOrphan(arena);
+        return Type._initOrphan(this);
     };
     Builder.prototype.getRoot = function(Structure) {
         var ct = Structure._CT;
+        var ctSize = ct.dataBytes + ct.pointersBytes;
         var root = this._root();
-        var layout = reader.structure.safe(this, root);
-        if (layout.pointersSection - layout.dataSection < ct.dataBytes || layout.end - layout.pointersSection < ct.pointersBytes) {
-            upgrade.structure(this, root, ct);
+        if (isNull(root)) {
+            var blob = this._preallocate(root.segment, ctSize);
+            this._zero(blob, ctSize);
+            builder.preallocated(root, blob, ct);
+        } else {
+            var layout = reader.safe(this, root);
+            if (layout.end - layout.dataSection < ctSize) {
+                upgrade.structure(this, root, ct);
+            }
         }
-        return Structure.deref(this, layout.segment, 0);
+        return Structure._deref(this, root);
     };
     Builder.prototype.setRoot = function(reader) {
         if (reader._CT.meta !== 0) throw new Error("Root must be a struct");
-        copy.pointer.deep(reader, reader._arena, this._root());
+        copy.pointer.deep(reader, this, this._root());
     };
     Builder.prototype.adoptRoot = function(orphan) {
         if (orphan._arena !== this) {
@@ -90,6 +99,10 @@ var upgrade = require('./upgrade');
             var oldEnd = segment._position;
             if (oldEnd + bytes < segment.length) {
                 segment._position += bytes;
+                // Zero-fill the last word of all allocations.
+                if (bytes > 0) {
+                    segment.fill(0, segment._position - 8, segment._position);
+                }
                 return {
                     segment: segment,
                     position: oldEnd
@@ -104,6 +117,8 @@ var upgrade = require('./upgrade');
         segment._id = this._segments.length;
         segment._position = bytes;
         this._segments.push(segment);
+        // Zero-fill the last word of all allocations.
+        segment.fill(0, bytes - 8, bytes);
         return {
             segment: segment,
             position: 0
@@ -128,6 +143,13 @@ var upgrade = require('./upgrade');
         var oldEnd = localSegment._position;
         if (oldEnd + bytes <= localSegment.length) {
             localSegment._position += bytes;
+            /*
+             * Zero-fill the last word of all allocations so that subword lists
+             * do not contain junk at their ends.
+             */
+            if (bytes > 0) {
+                localSegment.fill(0, localSegment._position - 8, localSegment._position);
+            }
             return {
                 segment: localSegment,
                 position: oldEnd
@@ -149,7 +171,7 @@ var upgrade = require('./upgrade');
      * target Datum
      */
     Builder.prototype._write = function(source, length, target) {
-        target.segment.set(source.segment.subarray(source.position, length), target.position);
+        source.segment.copy(target.segment, target.position, source.position, source.position + length);
     };
     Builder.prototype._zero = function(pointer, length) {
         this.__zero(pointer.segment, pointer.position, length);

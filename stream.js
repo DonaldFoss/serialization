@@ -3,7 +3,7 @@ var reader = require('./reader/primitives');
 var builder = require('./builder/primitives');
     var header = function(arena) {
         var count = arena._segments.length - 1;
-        var bytes = new Uint8Array(Math.ceil(count / 2) + 1);
+        var bytes = new Buffer(Math.ceil(count / 2) + 1);
         builder.uint32(count, bytes, 0);
         var i;
         for (i = 0; i < arena._segments.length; ++i) {

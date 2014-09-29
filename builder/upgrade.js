@@ -44,7 +44,7 @@ var shiftOffset = require('./shiftOffset');
      */
     var intrasegmentMovePointers = function(iTarget, length, delta) {
         for (var i = 0; i < length; ++i, iTarget.position += 8) {
-            if (!isNull(iTarget.segment, iTarget.position)) {
+            if (!isNull(iTarget)) {
                 var typeBits = iTarget.segment[iTarget.position] & 3;
                 if (typeBits === 0 || typeBits === 1) {
                     shiftOffset(iTarget, delta);
@@ -66,7 +66,7 @@ var shiftOffset = require('./shiftOffset');
      */
     var intersegmentMovePointers = function(arena, iSource, length, iTarget) {
         for (var i = 0; i < length; ++i, iSource.position += 8, iTarget.position += 8) {
-            if (!isNull(iTarget.segment, iTarget.position)) {
+            if (!isNull(iTarget)) {
                 var blob = farReader.blob(iTarget);
                 var typeBits = iSource.segment[iSource.position] & 3;
                 switch (typeBits) {
@@ -102,7 +102,10 @@ var shiftOffset = require('./shiftOffset');
         var layout = reader.structure.unsafe(arena, pointer);
         var blob = arena._preallocate(pointer.segment, ct.dataBytes + ct.pointersBytes);
         // Verbatim copy of the data section.
-        arena._write(layout.dataSection, layout.pointersSection - layout.dataSection, blob);
+        arena._write({
+            segment: layout.segment,
+            position: layout.dataSection
+        }, layout.pointersSection - layout.dataSection, blob);
         // Set up pointers section source and target iterators.
         var iSource = {
             segment: layout.segment,
@@ -119,12 +122,18 @@ var shiftOffset = require('./shiftOffset');
             // Moving within the same segment
             intrasegmentMovePointers(iTarget, pointersBytes >>> 3, blob.position - layout.dataSection);
             // Clobber the old structure entirely.
-            arena._zero(layout.begin, layout.end - layout.begin);
+            arena._zero({
+                segment: layout.segment,
+                position: layout.begin
+            }, layout.end - layout.begin);
         } else {
             // Moving to another segment.
             intersegmentMovePointers(arena, iSource, pointersBytes >>> 3, iTarget);
             // Clobber the old structure's data section.
-            arena._zero(layout.dataSection, layout.pointersSection - layout.dataSection);
+            arena._zero({
+                segment: layout.segment,
+                position: layout.dataSection
+            }, layout.pointersSection - layout.dataSection);
         }
         builder.structure.preallocated(pointer, blob, ct);
     };
