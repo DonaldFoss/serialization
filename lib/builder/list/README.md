@@ -1,0 +1,1 @@
+Getting a list type implies that the list has been upgraded to the current version.  Later versions are left intact.
