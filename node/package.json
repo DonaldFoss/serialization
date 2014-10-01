@@ -1,6 +1,6 @@
 {
   "name": "capnp-js",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Capnproto run-time decoding and encoding for Node.",
   "main": "index.js",
   "scripts": {
@@ -11,7 +11,12 @@
     "url": "https://github.com/popham/capnp-js-node.git"
   },
   "keywords": [
-    "capnproto"
+    "capnproto", 
+    "capnp",
+    "capnpc",
+    "pack",
+    "serialize",
+    "serialization"
   ],
   "author": "Tim Popham",
   "license": "MIT",
