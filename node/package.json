@@ -1,7 +1,7 @@
 {
   "name": "capnp-js",
-  "version": "0.0.1",
-  "description": "Capnproto run-time decoding and encoding for Node.",
+  "version": "0.0.2",
+  "description": "Capnproto run-time decoding and encoding for Node",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -23,8 +23,5 @@
   "bugs": {
     "url": "https://github.com/popham/capnp-js-node/issues"
   },
-  "homepage": "https://github.com/popham/capnp-js-node",
-  "dependencies": {
-    "text-encoding": "^0.1.0"
-  }
+  "homepage": "https://github.com/popham/capnp-js-node"
 }
