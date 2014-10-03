@@ -1,9 +1,7 @@
-var text = require('text-encoding');
 var Reader = require('../reader/Text');
 var statics = require('./list/statics');
 var methods = require('./list/methods');
 var layout = require('./layout/list');
-    var encoder = new text.TextEncoder("utf-8");
     var t = Reader._TYPE;
     var ct = Reader._CT;
     var Text = function(arena, layout, isDisowned) {

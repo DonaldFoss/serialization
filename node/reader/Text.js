@@ -1,4 +1,3 @@
-var text = require('text-encoding');
 var type = require('../type');
 var deref = require('./list/deref');
 var methods = require('./list/methods');

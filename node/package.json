@@ -1,6 +1,6 @@
 {
   "name": "capnp-js",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Capnproto run-time decoding and encoding for Node",
   "main": "index.js",
   "scripts": {
