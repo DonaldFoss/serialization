@@ -7,7 +7,13 @@ var builder = require('./builder/primitives');
         var segments = arena._segments.map(function(segment) {
             return segment.subarray(0, segment._position);
         });
-        var bytes = new Buffer(Math.ceil(count / 2) + 1);
+        /*
+         * Header Length
+         * count==0 => length==1 => 1 word
+         * count==1 => length==2 => 1.5 -> 2 word
+         * count==2 => length==3 => 2 word
+         */
+        var bytes = new Buffer((count & 65534) + 1 << 3);
         builder.uint32(count, bytes, 0);
         for (var i = 0; i < arena._segments.length; ++i) {
             builder.uint32(arena._segments[i]._position >>> 3, bytes, 1 + i << 2);
