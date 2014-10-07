@@ -5,7 +5,10 @@ var builder = require('./builder/primitives');
         var arena = instance._arena;
         var count = arena._segments.length - 1;
         var segments = arena._segments.map(function(segment) {
-            return segment.subarray(0, segment._position);
+            var s = segment.slice(0, segment._position);
+            s._id = segment._id;
+            s._position = segment._position;
+            return s;
         });
         /*
          * Header Length
@@ -33,7 +36,10 @@ var builder = require('./builder/primitives');
         var begin = end;
         for (var i = 0; i < end; i += 4) {
             var length = reader.uint32(blob, i);
-            segments.push(blob.slice(begin, begin + length));
+            var s = blob.slice(begin, begin + length);
+            s._id = i;
+            s._position = length;
+            segments.push(s);
             begin += length;
         }
         return new Arena(segments);
