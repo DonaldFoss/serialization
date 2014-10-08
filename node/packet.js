@@ -1,15 +1,25 @@
-var Arena = require('../reader/Arena');
+var Arena = require('./reader/Arena');
+var Allocator = require('./builder/Allocator');
+var deep = require('./builder/copy/deep');
+    var allocator = new Allocator();
     var fromStruct = function(instance) {
         var arena = instance._arena;
+        var singleton;
         if (arena._segments.length !== 1) {
-            throw new Error("Need to implement nontrivial serialization (predicated on size within a single segment)");
+            // Compute upper bound on necessary arena size:
+            // * Single hop far pointer implies 8 bytes of slop.
+            // * Double hop far pointer implies 16 bytes of slop.
+            var size = 0;
+            arena._segments.forEach(function(s) {
+                size += s._position;
+            });
+            var packetArena = allocator.createArena(size);
+            deep.setStructurePointer(arena, instance._layout(), packetArena, packetArena._root());
+            singleton = packetArena.getSegment(0);
+        } else {
+            singleton = arena.getSegment(0);
         }
-        var segment = arena._segments[0];
-        if (segment.length === segment._position) return [ segment ];
-        var s = segment.slice(0, segment._position);
-        s._id = 0;
-        s._position = segment._position;
-        return s;
+        return singleton.slice(0, singleton._position);
     };
     var toArena = function(blob) {
         return new Arena([ blob ]);
