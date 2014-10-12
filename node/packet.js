@@ -22,6 +22,9 @@ var deep = require('./builder/copy/deep');
         return singleton.slice(0, singleton._position);
     };
     var toArena = function(blob) {
+        blob = blob.slice();
+        blob._id = 0;
+        blob._position = blob.length;
         return new Arena([ blob ]);
     };
     module.exports = {
