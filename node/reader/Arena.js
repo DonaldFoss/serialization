@@ -19,7 +19,7 @@ var Limiter = require('./Limiter');
         return this._segments[id];
     };
     Reader.prototype.getRoot = function(Structure) {
-        return Structure._deref(this, this._root, 0);
+        return Structure._deref(this, this._root(), 0);
     };
     Reader.prototype._root = function() {
         return {
