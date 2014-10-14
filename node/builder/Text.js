@@ -19,7 +19,7 @@ var layout = require('./layout/list');
     statics.install(Text);
     Text._set = function(arena, pointer, value) {
         var source, length;
-        if (t === value._Type) {
+        if (t === value._TYPE) {
             source = {
                 segment: value._segment,
                 position: value._begin
