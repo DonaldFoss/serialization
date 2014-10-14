@@ -88,7 +88,7 @@ var isNull = require('../reader/isNull');
         }
         zeroFarLanding(arena, pointer);
         arena._zero(pointer, 8);
-        return target;
+        return pointer;
     };
     module.exports = {
         pointer: zero,
