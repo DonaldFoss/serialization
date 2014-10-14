@@ -1,10 +1,10 @@
 var reader = require('../reader/layout/index');
 var isNull = require('../reader/isNull');
 var farReader = require('../reader/far');
+var meta = require('../reader/list/meta');
 var farBuilder = require('./far');
 var builder = require('./layout/index');
 var shiftOffset = require('./shiftOffset');
-var meta = require('./meta');
     /*
      * Update a far pointer with its list or structure pointer if it is local to
      * `blob`.
