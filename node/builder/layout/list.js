@@ -21,7 +21,7 @@ var structure = require('./structure');
         pointer.segment[pointer.position + 1] = offset >>> 6;
         pointer.segment[pointer.position + 2] = offset >>> 14;
         pointer.segment[pointer.position + 3] = offset >>> 22;
-        if (meta.size === 7) {
+        if (meta.layout === 7) {
             composite(pointer, blob, meta, length);
         } else {
             lo(pointer, meta.layout, length);

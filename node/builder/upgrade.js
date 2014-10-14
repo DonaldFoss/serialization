@@ -4,6 +4,7 @@ var farReader = require('../reader/far');
 var farBuilder = require('./far');
 var builder = require('./layout/index');
 var shiftOffset = require('./shiftOffset');
+var meta = require('./meta');
     /*
      * Update a far pointer with its list or structure pointer if it is local to
      * `blob`.
@@ -147,15 +148,10 @@ var shiftOffset = require('./shiftOffset');
      */
     var list = function(arena, pointer, ct) {
         var layout = reader.list.unsafe(arena, pointer);
-        var meta = {
-            dataBytes: ct.dataBytes,
-            pointersBytes: ct.pointersBytes,
-            size: ct.size
-        };
-        meta.length = layout.length;
+        var rt = meta(layout);
         var blob, begin;
         var bytes = ct.dataBytes + ct.pointersBytes;
-        if (ct.size === 7) {
+        if (ct.layout === 7) {
             blob = arena._preallocate(pointer.segment, 8 + layout.length * bytes);
             begin = blob.position + 8;
         } else {
@@ -174,12 +170,18 @@ var shiftOffset = require('./shiftOffset');
             segment: blob.segment,
             position: begin
         };
+        var slop = {
+            data: rt.dataBytes - ct.dataBytes,
+            pointers: rt.pointersBytes - ct.pointersBytes
+        };
         for (var i = 0; i < layout.length; ++i) {
             // Verbatim copy the data section.
             arena._write(iSource, rt.dataBytes, iTarget);
             // Update iterator positions.
             iSource.position += ct.dataBytes;
-            iTarget.position += rt.dataBytes;
+            iTarget.position += ct.dataBytes;
+            arena._zero(iTarget, slop.data);
+            iTarget.position += slop.data;
             if (ct.encoding >= 6) {
                 if (layout.segment === blob.segment) {
                     intrasegmentMovePointers(iTarget, rt.pointersBytes >>> 3, delta + i * mis);
@@ -187,10 +189,11 @@ var shiftOffset = require('./shiftOffset');
                     intersegmentMovePointers(arena, iSource, rt.pointersBytes >>> 3, iTarget);
                 }
             }
+            arena._zero(iTarget, slop.pointers);
             // Realign the target iterator.
-            iTarget.position += ct.pointersBytes - rt.pointersBytes;
+            iTarget.position += slop.pointers;
         }
-        builder.list.preallocated(pointer, blob, meta);
+        builder.list.preallocated(pointer, blob, rt, layout.length);
     };
     module.exports = {
         list: list,
