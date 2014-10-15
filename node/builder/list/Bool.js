@@ -1,5 +1,6 @@
 var Reader = require('../../reader/list/Bool');
 var reader = require('../../reader/layout/list');
+var copy = require('../copy/deep');
 var builder = require('../layout/list');
 var statics = require('./statics');
 var methods = require('./methods');
@@ -44,24 +45,7 @@ var primitives = require('../primitives');
         if (!this._TYPE.equiv(value._TYPE)) {
             throw new TypeError();
         }
-        var size;
-        var source = {
-            segment: value._segment,
-            position: value._begin
-        };
-        var rt = value._rt();
-        if (rt.layout === 1) {
-            size = value._length >>> 3;
-            if (value._length & 7) size += 1;
-        } else if (rt.layout === 7) {
-            size = 8 + value._length * (rt.dataBytes + rt.pointersBytes);
-            source.position -= 8;
-        } else {
-            size = value._length * (rt.dataBytes + rt.pointersBytes);
-        }
-        var blob = arena._preallocate(value._segment, size);
-        arena._write(source, size, blob);
-        builder.preallocated(pointer, blob, rt, value._length);
+        copy.setListPointer(value._arena, value._layout(), arena, pointer);
     };
     Bools.prototype = {
         _TYPE: t,
