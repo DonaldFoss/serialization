@@ -58,9 +58,6 @@ var upgrade = require('./upgrade');
             }, true);
         };
         Structure._set = function(arena, pointer, value) {
-            if (t !== value._TYPE) {
-                throw new TypeError();
-            }
             copy.setStructurePointer(value._arena, value._layout(), arena, pointer);
         };
         Structure.prototype = {
