@@ -1,4 +1,5 @@
 var any = require('../reader/layout/any');
+var meta = require('../reader/list/meta');
 var isNull = require('../reader/isNull');
     /*
      * Zero a structure's memory, recurring into its pointers.
@@ -37,7 +38,7 @@ var isNull = require('../reader/isNull');
             position: layout.begin + layout.dataBytes
         };
         // Adjust for the list's tag word.
-        if (layout.size === 7) {
+        if (meta(layout).layout === 7) {
             bytes += 8;
             blob.position -= 8;
         }
