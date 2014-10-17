@@ -27,12 +27,13 @@ var layout = require('./layout/list');
                 length: value._length - 1
             };
         } else if (typeof value === "string") {
+            var segment = new Buffer(value, "utf8");
             return {
                 source: {
-                    segment: new Buffer(value, "utf8"),
+                    segment: segment,
                     position: 0
                 },
-                length: source.segment.length
+                length: segment.length
             };
         } else {
             throw new TypeError();
