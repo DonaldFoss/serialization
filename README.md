@@ -14,7 +14,7 @@ paths : {
 ```
 
 * Node: `npm install capnp-js`.
-  The Nodefy flow mentioned under `capnp-js-plugin`'s [Usage section](https://github.com/popham/capnp-js-plugin#Usage) generates absolute requires based from `capnp-js`, so the `npm`'s installation under *node_modules/* will resolve without any user intervention.
+  The Nodefy flow mentioned under `capnp-js-plugin`'s [Usage section](https://github.com/popham/capnp-js-plugin#usage) generates absolute requires based from `capnp-js`, so the `npm`'s installation under *node_modules/* will resolve without any user intervention.
 
 * I personally use Bower for AMD stuff and `npm` for Node stuff.
   While I refuse to point any AMD path into *node_modules/*, if you want to use `npm` to manage your AMD packages, then say so in the issue tracker:
