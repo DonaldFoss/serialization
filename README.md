@@ -28,7 +28,6 @@ npm install
 
 ## Building
 First, lets build a few messages.
-Then we can read them.
 
 * Root-up
 
@@ -105,4 +104,71 @@ moveClient.adoptPeer(moveReplacement);
 // moveClient.adoptSomeOtherPeer(movePeer1d)
 ```
 
+## Serialization
+Now, lets serialize the data structures in preparation for transmission.
+There are currently two serializers: stream and nonframe.
+Capnproto specifies [stream framing](http://kentonv.github.io/capnproto/encoding.html#serialization_over_a_stream).
+I've added a simple, non-framed analogue.
+
+* Stream Framing
+
+```
+var stream = require('capnp-js/stream');
+
+var rootUpStream = stream.fromStruct(rootUpClient);
+var rootUpClientStreamArena = stream.toArena(rootUpStream);
+
+var childDownStream = stream.fromStruct(childDownClient);
+var childDownClientStreamArena = stream.toArena(childDownStream);
+
+var copyStream1 = stream.fromStruct(copyClient1);
+var copyClient1StreamArena = stream.toArena(copyStream1);
+var copyStream2 = stream.fromStruct(copyClient2);
+var copyClient2StreamArena = stream.toArena(copyStream2);
+
+var moveStream = stream.fromStruct(moveClient);
+var moveClientStreamArena = stream.toArena(moveStream);
+```
+
+* Non-Framed
+
+```
+var nonframed = require('capnp-js/nonframed');
+
+var rootUpNonframed = nonframed.fromStruct(rootUpClient);
+var rootUpClientNonframedArena = nonframed.toArena(rootUpNonframed);
+
+var childDownNonframed = nonframed.fromStruct(childDownClient);
+var childDownClientNonframedArena = nonframed.toArena(childDownNonframed);
+
+var copyNonframed1 = nonframed.fromStruct(copyClient1);
+var copyClient1NonframedArena = nonframed.toArena(copyNonframed1);
+var copyNonframed2 = nonframed.fromStruct(copyClient2);
+var copyClient2NonframedArena = nonframed.toArena(copyNonframed2);
+
+var moveNonframed = nonframed.fromStruct(moveClient);
+var moveClientNonframedArena = nonframed.toArena(moveNonframed);
+```
+
 ## Reading
+Finally, lets wrap readers around the cloned arenas.
+
+* Stream Framing
+
+```
+var sfRootUpClientClone = rootUpClientStreamArena.getRoot(client.Client);
+var sfChildDownClientClone = childDownClientStreamArena.getRoot(client.Client);
+var sfCopyClient1Clone = copyClient1StreamArena.getRoot(client.Client);
+var sfCopyClient2Clone = copyClient2StreamArena.getRoot(client.Client);
+var sfMoveClientClone = moveClientStreamArena.getRoot(client.Client);
+```
+
+* Non-Framed
+
+```
+var nfRootUpClientClone = rootUpClientNonframedArena.getRoot(client.Client);
+var nfChildDownClientClone = childDownClientNonframedArena.getRoot(client.Client);
+var nfCcopyClient1Clone = copyClient1NonframedArena.getRoot(client.Client);
+var nfCopyClient2Clone = copyClient2NonframedArena.getRoot(client.Client);
+var nfMoveClientClone = moveClientNonframedArena.getRoot(client.Client);
+```
