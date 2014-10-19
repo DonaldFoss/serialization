@@ -38,9 +38,10 @@ Then we can read them.
 
 ```
 var Allocator = require('capnp-js/builder/Allocator');
+var alloc = new Allocator();
 var client = require('./client.capnp.d/builders');
 
-var rootUpClient = Allocator.initRoot(client.Client);
+var rootUpClient = alloc.initRoot(client.Client);
 var rootUpPeer = rootUpClient.initPeer();
 rootUpPeer.initAnswer().setSdp('Hello from Root Up');
 
@@ -50,11 +51,11 @@ rootUpPeer.initAnswer().setSdp('Hello from Root Up');
 
 ```
 var Allocator = require('capnp-js/builder/Allocator');
+var alloc = new Allocator();
 var client = require('./client.capnp.d/builders');
 var peer = require('./peer.capnp.d/builders');
 
-var allocator = new Allocator();
-var childDownArena = allocator.createArena();
+var childDownArena = alloc.createArena();
 
 var childDownPeer = childDownArena.initOrphan(peer.Peer);
 childDownPeer.initAnswer().setSdp('Hello from Child Down');
@@ -67,10 +68,11 @@ childDownClient.adoptPeer(childDownPeer);
 
 ```
 var Allocator = require('capnp-js/builder/Allocator');
+var alloc = new Allocator();
 var client = require('./client.capnp.d/builders');
 
-var copyClient1 = Allocator.initRoot(client.Client);
-var copyClient2 = Allocator.initRoot(client.Client);
+var copyClient1 = alloc.initRoot(client.Client);
+var copyClient2 = alloc.initRoot(client.Client);
 
 var copyPeer1 = copyClient1.initPeer();
 copyPeer1.initAnswer().setSdp('Hello from Copy');
@@ -82,11 +84,11 @@ copyClient2.setPeer(copyPeer1);
 
 ```
 var Allocator = require('capnp-js/builder/Allocator');
+var alloc = new Allocator();
 var client = require('./client.capnp.d/builders');
 var peer = require('./peer.capnp.d/builders');
 
-var allocator = new Allocator();
-var moveArena = allocator.createArena();
+var moveArena = alloc.createArena();
 
 var moveClient = moveArena.initRoot(client.Client);
 
