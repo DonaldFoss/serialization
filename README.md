@@ -22,7 +22,7 @@ paths : {
 
 # Usage
 The following interacts with code generated from [peer.capnp](https://github.com/popham/rtc-github-protocol/blob/master/peer.capnp) and [client.capnp](https://github.com/popham/rtc-github-protocol/blob/master/client.capnp).
-To play around with it under Node, clone the project:
+To play around with it under Node, clone the parent project:
 
 ```
 git clone https://github.com/popham/rtc-github-protocol.git
