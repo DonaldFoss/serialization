@@ -25,8 +25,8 @@ The following interacts with code generated from [peer.capnp](https://github.com
 To play around with it under Node, clone the parent project:
 
 ```
-git clone https://github.com/popham/rtc-github-protocol.git
-cd rtc-github-protocol
+git clone https://github.com/popham/rtc-github-protocol-node.git
+cd rtc-github-protocol-node
 npm install
 ```
 
