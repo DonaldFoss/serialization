@@ -1,6 +1,4 @@
-var Arena = require('./reader/Arena');
-var Allocator = require('./builder/Allocator');
-var deep = require('./builder/copy/deep');
+define([ "./reader/Arena", "./builder/Allocator", "./builder/copy/deep" ], function(Arena, Allocator, deep) {
     var allocator = new Allocator();
     var fromStruct = function(instance) {
         var arena = instance._arena;
@@ -13,21 +11,22 @@ var deep = require('./builder/copy/deep');
             arena._segments.forEach(function(s) {
                 size += s._position;
             });
-            var nonframeArena = allocator.createArena(size);
-            deep.setStructurePointer(arena, instance._layout(), nonframeArena, nonframeArena._root());
-            singleton = nonframeArena.getSegment(0);
+            var nonframedArena = allocator.createArena(size);
+            deep.setStructurePointer(arena, instance._layout(), nonframedArena, nonframedArena._root());
+            singleton = nonframedArena.getSegment(0);
         } else {
             singleton = arena.getSegment(0);
         }
-        return singleton.slice(0, singleton._position);
+        return singleton.subarray(0, singleton._position);
     };
     var toArena = function(blob) {
-        blob = blob.slice();
+        blob = blob.subarray();
         blob._id = 0;
         blob._position = blob.length;
         return new Arena([ blob ]);
     };
-    module.exports = {
+    return {
         fromStruct: fromStruct,
         toArena: toArena
     };
+});
