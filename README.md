@@ -38,7 +38,7 @@ Then we can read them.
 
 ```
 var Allocator = require('capnp-js/builder/Allocator');
-var client = require('rtc-github-protocol/client.capnp.d/builder');
+var client = require('rtc-github-protocol/client.capnp.d/builders');
 
 var rootUpClient = Allocator.initRoot(client.Client);
 var rootUpPeer = rootUpClient.initPeer();
@@ -50,8 +50,8 @@ rootUpPeer.initAnswer().setSdp('Hello from Root Up');
 
 ```
 var Allocator = require('capnp-js/builder/Allocator');
-var client = require('rtc-github-protocol/client.capnp.d/builder');
-var peer = require('rtc-github-protocol/peer.capnp.d/builder');
+var client = require('rtc-github-protocol/client.capnp.d/builders');
+var peer = require('rtc-github-protocol/peer.capnp.d/builders');
 
 var allocator = new Allocator();
 var childDownArena = allocator.createArena();
@@ -67,7 +67,7 @@ childDownClient.adoptPeer(childDownPeer);
 
 ```
 var Allocator = require('capnp-js/builder/Allocator');
-var client = require('rtc-github-protocol/client.capnp.d/builder');
+var client = require('rtc-github-protocol/client.capnp.d/builders');
 
 var copyClient1 = Allocator.initRoot(client.Client);
 var copyClient2 = Allocator.initRoot(client.Client);
@@ -82,8 +82,8 @@ copyClient2.setPeer(copyPeer1);
 
 ```
 var Allocator = require('capnp-js/builder/Allocator');
-var client = require('rtc-github-protocol/client.capnp.d/builder');
-var peer = require('rtc-github-protocol/peer.capnp.d/builder');
+var client = require('rtc-github-protocol/client.capnp.d/builders');
+var peer = require('rtc-github-protocol/peer.capnp.d/builders');
 
 var allocator = new Allocator();
 var moveArena = allocator.createArena();
