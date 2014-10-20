@@ -108,7 +108,9 @@ There are currently two serializers: stream and nonframe.
 Capnproto specifies [stream framing](http://kentonv.github.io/capnproto/encoding.html#serialization_over_a_stream).
 I've added a simple, non-framed analogue.
 
-* Stream Framing
+* Stream Framing - I don't care for my stream framing interface.
+  Expect it to change--in fact, feel free to complain in the issue tracker with use cases that can drive a better implementation.
+  In the meantime, the following works.
 
 ```
 var stream = require('capnp-js/stream');
@@ -128,7 +130,7 @@ var moveStream = stream.fromStruct(moveClient);
 var moveClientStreamArena = stream.toArena(moveStream);
 ```
 
-* Non-Framed
+* Non-Framed - The nonframed interface consolidates a full arena to a single segment.
 
 ```
 var nonframed = require('capnp-js/nonframed');
