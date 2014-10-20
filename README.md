@@ -99,7 +99,7 @@ moveReplacement.initAnswer().setSdp('Hello from Move (Replacement)');
 moveClient.adoptPeer(moveReplacement);
 
 // Pretend with me again:
-// moveClient.adoptSomeOtherPeer(movePeer1d)
+// moveClient.adoptSomeOtherPeer(movePeer1d);
 ```
 
 ## Serialization
@@ -166,7 +166,7 @@ var sfMoveClientClone = moveClientStreamArena.getRoot(client.Client);
 ```
 var nfRootUpClientClone = rootUpClientNonframedArena.getRoot(client.Client);
 var nfChildDownClientClone = childDownClientNonframedArena.getRoot(client.Client);
-var nfCcopyClient1Clone = copyClient1NonframedArena.getRoot(client.Client);
+var nfCopyClient1Clone = copyClient1NonframedArena.getRoot(client.Client);
 var nfCopyClient2Clone = copyClient2NonframedArena.getRoot(client.Client);
 var nfMoveClientClone = moveClientNonframedArena.getRoot(client.Client);
 ```
