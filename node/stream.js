@@ -40,12 +40,12 @@ var builder = require('./builder/primitives');
             throw new RangeError();
         }
         var header = headerPlusSegments[0];
-        for (var i = 1; i < headersPlusSegments.length; ++i) {
-            var segment = headersPlusSegments[i];
+        for (var i = 1; i < headerPlusSegments.length; ++i) {
+            var segment = headerPlusSegments[i];
             segment[i]._id = i - 1;
             segment[i]._position = segment.length;
         }
-        return new Arena(headersPlusSegments.slice(1));
+        return new Arena(headerPlusSegments.slice(1));
     };
     module.exports = {
         fromStruct: fromStruct,
