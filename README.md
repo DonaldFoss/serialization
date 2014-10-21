@@ -103,7 +103,7 @@ moveClient.adoptPeer(moveReplacement);
 ```
 
 ## Serialization
-Now, lets serialize the data structures in preparation for transmission.
+Now, lets serialize the data structures in preparation for transmission, then deserialize.
 There are currently two serializers: stream and nonframe.
 Capnproto specifies [stream framing](http://kentonv.github.io/capnproto/encoding.html#serialization_over_a_stream).
 I've added a simple, non-framed analogue.
