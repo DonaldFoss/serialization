@@ -91,7 +91,7 @@ var movePeer1 = moveClient.initPeer();
 var movePeer1d = moveClient.disownPeer();
 movePeer1.initAnswer().setSdp('Hello from Move (Initial)');
 
-// client.capnp doesn't have a second `Peer` to move, so lets pretend:
+// client.capnp doesn't have a second `Peer` to swap with, so lets pretend:
 // var moveReplacement = moveClient.disownSomeOtherPeer();
 var moveReplacement = moveArena.initOrphan(peer.Peer);
 
