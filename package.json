@@ -11,7 +11,8 @@
     "mocha": "^1.21.4"
   },
   "scripts": {
-    "build": "./node_modules/.bin/gulp build"
+    "build": "./node_modules/.bin/gulp build",
+    "test" : "mocha test/list test/structure"
   },
   "repository": {
     "type": "git",
