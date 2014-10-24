@@ -16,7 +16,7 @@ var rt = {
     pointersBytes : 24,
 };
 
-describe ('Intrasegment struct pointer', function () {
+describe ('Preallocated intrasegment struct pointer', function () {
     var segment = new Buffer(80);
     segment.fill(0);
     var p = { segment:segment, position:0 };
