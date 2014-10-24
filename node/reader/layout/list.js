@@ -10,7 +10,7 @@ var inlineCompositeList = require('./inlineCompositeList');
         }
     };
     var intersegment = function(tag, blob) {
-        if ((pointer.segment[pointer.position + 4] & 7) === 7) {
+        if ((tag.segment[tag.position + 4] & 7) === 7) {
             return inlineCompositeList.intersegment(tag, blob);
         } else {
             return subwordList.intersegment(tag, blob);
