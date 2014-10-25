@@ -92,7 +92,7 @@ describe ('Preallocated intersegment list pointer with layout of non-7', functio
         assert.equal(segment1[land.position+7], 0);
     });
 
-    it ('should have a landing pad that points to a tagless blob', function () {
+    it ('should resolve to a tagless blob', function () {
         assert.equal(segment1[blob.position], 0);
         assert.equal(segment1[blob.position+1], 0);
         assert.equal(segment1[blob.position+2], 0);
@@ -133,7 +133,7 @@ describe('Preallocated intrasegment list pointer with layout of 7', function () 
         assert.equal(segment[p.position+7], 0);
     });
 
-    it ('should point at a tagged blob', function () {
+    it ('should resolve to a tagged blob', function () {
         assert.equal(segment[blob.position], length<<2);
         assert.equal(segment[blob.position+1], 0);
         assert.equal(segment[blob.position+2], 0);
@@ -188,7 +188,7 @@ describe('Preallocated intersegment list pointer with layout of 7', function () 
         assert.equal(segment1[land.position+7], 0);
     });
 
-    it ('should have a tagged blob offset 0 from its landing pad', function () {
+    it ('should resolve to a tagged blob offset 0 from its landing pad', function () {
         assert.equal(segment1[blob.position], length<<2);
         assert.equal(segment1[blob.position+1], 0);
         assert.equal(segment1[blob.position+2], 0);
