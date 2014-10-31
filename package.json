@@ -3,16 +3,19 @@
   "version": "0.1.0",
   "description": "Capnproto run-time builder.",
   "devDependencies": {
+    "capnp-js-plugin": "^0.1.0",
     "gulp": "^3.8.7",
     "gulp-jshint": "^1.8.4",
     "gulp-nodefy": "0.0.0",
     "gulp-preprocess": "^1.1.1",
     "gulp-uglify": "^0.3.1",
-    "mocha": "^1.21.4"
+    "mocha": "^1.21.4",
+    "nodefy": "^0.2.2"
   },
   "scripts": {
     "build": "./node_modules/.bin/gulp build",
-    "test" : "mocha test/list test/structure"
+    "test-prep": "mkdir -p tmp && capnp compile -ojs:tmp --src-prefix=test test/testing.capnp && nodefy -o test/testing.capnp.d './tmp/testing.capnp.d/**/*.js'",
+    "test": "mocha test/structure test/list"
   },
   "repository": {
     "type": "git",
@@ -23,5 +26,6 @@
   "bugs": {
     "url": "https://github.com/popham/capnp-js-base/issues"
   },
-  "homepage": "https://github.com/popham/capnp-js-base"
+  "homepage": "https://github.com/popham/capnp-js-base",
+  "private": true
 }
