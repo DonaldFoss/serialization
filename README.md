@@ -1,5 +1,5 @@
-capnp-js
-========
+capnp-js [![Build Status](https://travis-ci.org/popham/capnp-js-base.svg?branch=master)](https://travis-ci.org/popham/capnp-js-base)
+====================================================================================================================================
 
 Javascript runtime for [Capnproto](http://kentonv.github.io/capnproto/index.html).
 
