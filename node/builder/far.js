@@ -18,6 +18,6 @@
             far(pointer, target, 2);
         },
         preterminal: function(pointer, target) {
-            far(pointer, target, 4);
+            far(pointer, target, 6);
         }
     };
