@@ -1,5 +1,4 @@
 var type = require('../type');
-var size = require('./size');
     var t = new type.Terminal();
     var Any = function(arena, pointer, depth) {
         this._arena = arena;
@@ -7,27 +6,22 @@ var size = require('./size');
         this._depth = depth;
     };
     Any._TYPE = t;
-    Any.prototype = {
-        _TYPE: t
-    };
     Any._deref = function(arena, pointer, depth) {
         return new Any(arena, pointer, depth);
     };
-    Any.prototype._bytes = function() {
-        return size.blobs(this._arena, this._pointer);
+    Any.prototype = {
+        _TYPE: t
     };
-    // Upgrade to fill all fields for settability.
-    Any.prototype.getAs = function(Derefable) {
+    Any.prototype.cast = function(Derefable) {
         /*
          * No increment on `depth` since the caller of `deref` has already
-         * incremented.
+         * incremented.  `Derefable` is responsible for applying read and depth
+         * limits.
          */
+        if (Derefable._READER) {
+            // User provided a builder--grab its reader and dereference that.
+            return Derefable._READER._deref(this._arena, this._pointer, this._depth);
+        }
         return Derefable._deref(this._arena, this._pointer, this._depth);
     };
-    Any.prototype._initStruct = function(Struct) {};
-    Any.prototype._initList = function(List, length) {};
-    Any.prototype.set = function(reader) {};
-    Any.prototype.adopt = function(orphan) {};
-    Any.prototype.disownAs = function(Derefable) {};
-    Any.prototype.cast = function(Derefable) {};
     module.exports = Any;
