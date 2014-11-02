@@ -9,4 +9,6 @@ struct DenseWords {
     p1 @5 :Data;
     p2 @6 :Text;
     p3 @7 :Data;
+    p4 @8 :AnyPointer;
 }
+
