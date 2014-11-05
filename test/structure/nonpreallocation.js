@@ -100,13 +100,8 @@ describe ('Non-preallocated structure pointers', function () {
 
         var wordAlignedBytes = ct.dataBytes + ct.pointersBytes;
 
-        assert.equal((wordAlignedBytes >>> 3) % 2, 0);
-
-        /*
-         * The blob allocation will require a new segment.  This new segment has
-         * sufficient space for the blob alone, no landing pad.
-         */
-        var arena = alloc.createArena(wordAlignedBytes / 2);
+        // Leave no space for an far pointer hop.
+        var arena = alloc.createArena(8);
 
         // Word 0 of segment 0.
         var p = arena._root();
