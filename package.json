@@ -16,7 +16,7 @@
     "postinstall": "npm run build",
     "build": "./node_modules/.bin/gulp build",
     "test-prep": "mkdir -p tmp && capnp compile -ojs:tmp --src-prefix=test test/testing.capnp && nodefy -o test/testing.capnp.d './tmp/testing.capnp.d/**/*.js'",
-    "test": "mocha test/structure test/list"
+    "test": "npm run test-prep && mocha test/structure test/list"
   },
   "repository": {
     "type": "git",
