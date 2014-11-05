@@ -327,15 +327,10 @@ describe ('Non-preallocated list pointers', function () {
             // Void lists fit anywhere.
             assert((rt.dataBytes + rt.pointersBytes)*length >= 8);
 
-            assert.equal(rt.layout, 0x07);
             var wordAlignedBytes = (rt.dataBytes + rt.pointersBytes) * length;
-            assert.equal((wordAlignedBytes>>>3) % 2, 1);
 
-            /*
-             * The blob allocation will require a new segment.  This new segment
-             * has sufficient space for the blob alone, no landing pad.
-             */
-            var arena = alloc.createArena((8 + wordAlignedBytes) / 2);
+            // Leave no space for a hop point.
+            var arena = alloc.createArena(8);
 
             // Word 0 of segment 0.
             var p = arena._root();
