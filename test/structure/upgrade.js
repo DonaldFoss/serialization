@@ -11,11 +11,11 @@ var sArena = alloc.createArena();
 var s = sArena.initRoot(builder.FirstStruct);
 s.setUint16Field(107);
 s.setTextField('asdf');
-s.setStructField(s);
 
-var ell = s.initUint8List(39);
-ell.set(3,16);
-ell.set(31,12);
+var textLength = s.getTextField()._length;
+textLength += textLength%8 ? (8-textLength%8) : 0;
+
+s.setStructField(s);
 
 var stale = sArena.asReader().getRoot(reader.SecondStruct);
 
@@ -95,34 +95,46 @@ describe ('Upgraded structure pointers', function () {
         });
     });
 
-    /*
-     * Size the arena so that the text gets allocated on a separate segment.
-         * The separate segment should contain enough space for the upgraded
-         * struct.  The precise allocation accounting is as follows:
-         * * For an original struct size of `o`, the root segment has `8+o`
-         *   bytes.
-         * * The second segment then has `16+2o` bytes.
-         * * Besides the upgraded struct, the second segment needs
-         *   - `t` bytes for the text content,
+    describe ('Intersegment', function () {
+        /*
+         * Size the arena so that a child struct's text gets allocated on a
+         * separate segment.  The separate segment should contain enough space
+         * for upgrading everything to one segment.  The precise allocation
+         * accounting is as follows:
+         * * For an original struct size of `o` and a text size of `t`, the root
+         *   segment is constructed as `8+2o+t` bytes, leaving a remaining `t`
+         *   for the next segment.
+         * * The second segment then has `16+4o+2t` bytes.
+         * * Besides the upgraded structs, the second segment needs
+         *   - `t` bytes for the text content of the stale child struct,
          *   - 8 bytes for the root pointer's landing pad,
-         *   - and `u` bytes for the upgraded struct's body.
-         * * For this test to remain valid, `u` must remain at or below
-         *   t+8+u < 16+2o => u < 8+2o-t.
-         * * Generalizing the original struct to contain more than just the one
-         *   bit of text data, substitute the sum of their bytes for `t`.
+         *   - and `2u` bytes for the upgraded struct bodies.
+         * * For this test to remain valid, `u` must satisfy
+         *   t+8+2u < 16+4o+2t
+         *   => u < 4+2o+0.5t --word alignment--> 4+2o+floor_8(0.5t)
+         *   => u < 4+2o+floor_8(0.5t)
          */
 
-
-
-
-    describe ('Intersegment', function () {
-        var arena = alloc.createArena(8+size(reader.FirstStruct._CT));
+        var arena = alloc.createArena(8 + 2*size(reader.FirstStruct._CT) + textLength);
         arena.setRoot(stale);
+        assert.doesNotThrow(function () { arena.getSegment(1); }, RangeError)
+        assert.throws(function () { arena.getSegment(2); }, RangeError);
+
         var first = layout.structure.unsafe(arena, arena._root());
+
+        assert.doesNotThrow(function () { arena.getSegment(1); }, RangeError)
+        assert.throws(function () { arena.getSegment(2); }, RangeError);
+
         var prior = new Buffer(first.end - first.dataSection);
         first.segment.copy(prior, 0, first.dataSection);
-        upgrade.structure(arena, arena._root(), reader.SecondStruct._CT);
-        var second = layout.structure.unsafe(arena, arena._root());
+
+        // Upgrade both structs to catch up with child's text data.
+        var root = arena.getRoot(builder.SecondStruct);
+        var child = root.getStructField();
+        var second = root._layout();
+
+        assert.doesNotThrow(function () { arena.getSegment(1); }, RangeError)
+        assert.throws(function () { arena.getSegment(2); }, RangeError);
 
         it ('should contain an identical data section', function () {
             var it1 = {
@@ -164,147 +176,32 @@ describe ('Upgraded structure pointers', function () {
             }
         });
 
-        it ('should contain intrasegment pointers when possible', function () {
-            /*
-             * As long as the test schema is versioned correctly, this offset
-             * (the offset to the text pointer) should never change.
-             */
-            var offset = 0;
+        /*
+         * As long as the test schema is versioned correctly, this offset (the
+         * offset to the text pointer) should never change.
+         */
+        var offset = 0;
+        var ell = child._layout();
 
-            // In upgraded position, the text pointer is now local.
+        it ('should localize intersegment pointers that become local', function () {
+            // In upgraded position, the child's text pointer is local.
             assert.equal(
-                second.segment[second.pointersSection+offset]&0x03,
+                ell.segment[ell.pointersSection+offset] & 0x03,
                 0x01
             );
         });
-    });
 
-    describe ('Intersegment', function () {
-        var arena = alloc.createArena(16+size(reader.FirstStruct._CT));
-        arena.setRoot(stale);
-        var first = layout.structure.unsafe(arena, arena._root());
-        var prior = new Buffer(first.end - first.dataSection);
-        first.segment.copy(prior, 0, first.dataSection);
-        upgrade.structure(arena, arena._root(), reader.SecondStruct._CT);
-        var second = layout.structure.unsafe(arena, arena._root());
-
-        it ('should contain an identical data section', function () {
-            var it1 = {
-                segment : prior,
-                position : 0
-            };
-
-            var it2 = {
-                segment : second.segment,
-                position : second.dataSection
-            };
-
-            assert(dataEq(it1, it2, first.pointersSection-first.dataSection));
-
-            // Verify that the remainder is zeroed.
-            var diff = reader.SecondStruct._CT.dataBytes - reader.FirstStruct._CT.dataBytes;
-            for (var i=0; i<diff; ++i)
-                assert.equal(it2.segment[it2.position+i], 0);
-        });
-
-        it ('should contain pointers that dereference identically', function () {
-            var it1 = {
-                segment : first.segment,
-                position : first.pointersSection
-            };
-
-            var it2 = {
-                segment : second.segment,
-                position : second.pointersSection
-            };
-
-            var count = (first.end-first.pointersSection) / 8;
-            assert(pointersEq(arena, it1, it2, count));
-
-            // Verify that the remainder is zeroed.
-            var diff = reader.SecondStruct._CT.pointersBytes - reader.FirstStruct._CT.pointersBytes;
-            for (var i=0; i<diff; ++i) {
-                assert.equal(it2.segment[it2.position+i], 0);
-            }
-        });
-
-        it ('should contain intrasegment pointers when possible', function () {
-            /*
-             * As long as the test schema is versioned correctly, this offset
-             * (the offset to the text pointer) should never change.
-             */
-            var offset = 0;
-
-            // In upgraded position, the text pointer is now local.
+        it ('should convert local pointers to far pointers', function () {
+            // In upgraded position, the parent's text pointer is now nonlocal.
             assert.equal(
-                second.segment[second.pointersSection+offset]&0x03,
-                0x01
+                second.segment[second.pointersSection+offset] & 0x03,
+                0x02
             );
         });
-    });
 
-    describe ('Intersegment', function () {
-console.log('INTER');
-        var arena = alloc.createArena(size(reader.FirstStruct._CT));
-        arena.setRoot(stale);
-        var first = layout.structure.unsafe(arena, arena._root());
-        var prior = new Buffer(first.end - first.dataSection);
-        first.segment.copy(prior, 0, first.dataSection);
-        upgrade.structure(arena, arena._root(), reader.SecondStruct._CT);
-        var second = layout.structure.unsafe(arena, arena._root());
-
-        it ('should contain an identical data section', function () {
-            var it1 = {
-                segment : prior,
-                position : 0
-            };
-
-            var it2 = {
-                segment : second.segment,
-                position : second.dataSection
-            };
-
-            assert(dataEq(it1, it2, first.pointersSection-first.dataSection));
-
-            // Verify that the remainder is zeroed.
-            var diff = reader.SecondStruct._CT.dataBytes - reader.FirstStruct._CT.dataBytes;
-            for (var i=0; i<diff; ++i)
-                assert.equal(it2.segment[it2.position+i], 0);
-        });
-
-        it ('should contain pointers that dereference identically', function () {
-            var it1 = {
-                segment : first.segment,
-                position : first.pointersSection
-            };
-
-            var it2 = {
-                segment : second.segment,
-                position : second.pointersSection
-            };
-
-            var count = (first.end-first.pointersSection) / 8;
-            assert(pointersEq(arena, it1, it2, count));
-
-            // Verify that the remainder is zeroed.
-            var diff = reader.SecondStruct._CT.pointersBytes - reader.FirstStruct._CT.pointersBytes;
-            for (var i=0; i<diff; ++i) {
-                assert.equal(it2.segment[it2.position+i], 0);
-            }
-        });
-
-        it ('should contain intrasegment pointers when possible', function () {
-            /*
-             * As long as the test schema is versioned correctly, this offset
-             * (the offset to the text pointer) should never change.
-             */
-            var offset = 0;
-
-            // In upgraded position, the text pointer is now local.
-            assert.equal(
-                second.segment[second.pointersSection+offset]&0x03,
-                0x01
-            );
-        });
+        /*
+         * Due to reuse of the stale version's pointers, a double far never
+         * arises.
+         */
     });
 });
