@@ -1,9 +1,9 @@
 {
   "name": "capnp-js-base",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Capnproto run-time builder.",
   "devDependencies": {
-    "capnp-js-plugin": "^0.1.0",
+    "capnp-js-plugin": "^0.1.1",
     "gulp": "^3.8.7",
     "gulp-jshint": "^1.8.4",
     "gulp-nodefy": "0.0.0",
