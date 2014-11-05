@@ -13,8 +13,10 @@
     "nodefy": "git://github.com/popham/nodefy#circular_refs"
   },
   "scripts": {
-    "postinstall": "npm run build && cd node && npm link && cd .. && npm link capnp-js",
+    "postinstall": "npm run override-nodefy && (npm run build & npm run link-capnp & wait)",
     "build": "./node_modules/.bin/gulp build",
+    "link-capnp": "cd node && npm link && cd .. && npm link capnp-js",
+    "override-nodefy": "cd node_modules/gulp-nodefy && rm -rf node_modules/nodefy && npm install popham/nodefy#circular_refs",
     "test-prep": "mkdir -p tmp && capnp compile -ojs:tmp --src-prefix=test test/testing.capnp && nodefy -o test/testing.capnp.d './tmp/testing.capnp.d/**/*.js'",
     "test": "mocha test/structure test/list"
   },
