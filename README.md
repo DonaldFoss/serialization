@@ -14,7 +14,7 @@ Javascript runtime for [Capnproto](http://kentonv.github.io/capnproto/index.html
   While I refuse to point any AMD path into *node_modules/*, if you want to use `npm` to manage your AMD packages, then say so in the issue tracker:
   I'll publish to `capnp-js-amd`.
 
-# Usage
+# Use
 The following interacts with code generated from [peer.capnp](https://github.com/popham/rtc-github-protocol/blob/master/peer.capnp) and [client.capnp](https://github.com/popham/rtc-github-protocol/blob/master/client.capnp).
 To play around with it under Node, clone the parent project:
 
