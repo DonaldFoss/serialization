@@ -249,13 +249,6 @@ describe ('List of upgraded structures', function () {
             }
         });
 
-        /*
-         * As long as the test schema is versioned correctly, this offset (the
-         * offset to the text pointer) should never change.
-         */
-        var offset = 0;
-        var ell = child._layout();
-
         it ('should localize intersegment pointers that become local (free pass)', function () {
             // Free pass since this leverages the same code as structs
         });
