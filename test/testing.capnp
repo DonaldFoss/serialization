@@ -1,5 +1,9 @@
 @0xd3fc2b794ccf0e89;
 
+# There exist tests that reference specific offsets into the struct fields.  As
+# long as proper upgrading practices are followed, no tests should break upon
+# extension.
+
 struct WrapAny {
     anyField @0 :AnyPointer;
 }
