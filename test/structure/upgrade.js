@@ -44,7 +44,7 @@ var pointersEq = function (arena, it1, it2, count) {
     return true;
 };
 
-describe ('Upgraded structure pointers', function () {
+describe ('Upgraded structure pointer', function () {
     describe ('Intrasegment', function () {
         var arena = alloc.createArena();
         arena.setRoot(stale);
@@ -97,7 +97,7 @@ describe ('Upgraded structure pointers', function () {
 
     describe ('Intersegment', function () {
         /*
-         * Size the arena so that a child struct's text gets allocated on a
+         * Size the arena so that the child struct's text gets allocated on a
          * separate segment.  The separate segment should contain enough space
          * for upgrading everything to one segment.  The precise allocation
          * accounting is as follows:
@@ -105,7 +105,7 @@ describe ('Upgraded structure pointers', function () {
          *   segment is constructed as `8+2o+t` bytes, leaving a remaining `t`
          *   for the next segment.
          * * The second segment then has `16+4o+2t` bytes.
-         * * Besides the upgraded structs, the second segment needs
+         * * The second segment needs
          *   - `t` bytes for the text content of the stale child struct,
          *   - 8 bytes for the root pointer's landing pad,
          *   - and `2u` bytes for the upgraded struct bodies.
@@ -128,7 +128,7 @@ describe ('Upgraded structure pointers', function () {
         var prior = new Buffer(first.end - first.dataSection);
         first.segment.copy(prior, 0, first.dataSection);
 
-        // Upgrade both structs to catch up with child's text data.
+        // Upgrade both structs to catch up with child's pointers.
         var root = arena.getRoot(builder.SecondStruct);
         var child = root.getStructField();
         var second = root._layout();
@@ -200,8 +200,8 @@ describe ('Upgraded structure pointers', function () {
         });
 
         /*
-         * Due to reuse of the stale version's pointers, a double far never
-         * arises.
+         * Due to reuse of the stale version's pointers as landing pads, a
+         * double far never arises.
          */
     });
 });
