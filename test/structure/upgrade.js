@@ -65,7 +65,7 @@ describe ('Upgraded structure pointer', function () {
                 position : second.dataSection
             };
 
-            assert(dataEq(it1, it2, first.pointersSection-first.dataSection));
+            assert(dataEq(it1, it2, reader.FirstStruct._CT.dataBytes));
 
             // Verify that the remainder is zeroed.
             var diff = reader.SecondStruct._CT.dataBytes - reader.FirstStruct._CT.dataBytes;
@@ -75,8 +75,8 @@ describe ('Upgraded structure pointer', function () {
 
         it ('should contain pointers that dereference identically', function () {
             var it1 = {
-                segment : first.segment,
-                position : first.pointersSection
+                segment : prior,
+                position : reader.FirstStruct.dataBytes
             };
 
             var it2 = {
@@ -84,7 +84,7 @@ describe ('Upgraded structure pointer', function () {
                 position : second.pointersSection
             };
 
-            var count = (first.end-first.pointersSection) / 8;
+            var count = reader.FirstStruct._CT.dataBytes / 8;
             assert(pointersEq(arena, it1, it2, count));
 
             // Verify that the remainder is zeroed.
@@ -147,7 +147,7 @@ describe ('Upgraded structure pointer', function () {
                 position : second.dataSection
             };
 
-            assert(dataEq(it1, it2, first.pointersSection-first.dataSection));
+            assert(dataEq(it1, it2, reader.FirstStruct._CT.dataBytes));
 
             // Verify that the remainder is zeroed.
             var diff = reader.SecondStruct._CT.dataBytes - reader.FirstStruct._CT.dataBytes;
@@ -157,8 +157,8 @@ describe ('Upgraded structure pointer', function () {
 
         it ('should contain pointers that dereference identically', function () {
             var it1 = {
-                segment : first.segment,
-                position : first.pointersSection
+                segment : prior,
+                position : reader.FirstStruct._CT.dataBytes
             };
 
             var it2 = {
@@ -166,7 +166,7 @@ describe ('Upgraded structure pointer', function () {
                 position : second.pointersSection
             };
 
-            var count = (first.end-first.pointersSection) / 8;
+            var count = reader.FirstStruct._CT.dataBytes / 8;
             assert(pointersEq(arena, it1, it2, count));
 
             // Verify that the remainder is zeroed.
