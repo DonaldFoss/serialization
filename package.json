@@ -1,6 +1,6 @@
 {
   "name": "capnp-js-base",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Capnproto run-time builder.",
   "devDependencies": {
     "buffers": "^0.1.1",
