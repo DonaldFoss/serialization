@@ -3,14 +3,19 @@
   "version": "0.1.1",
   "description": "Capnproto run-time builder.",
   "devDependencies": {
+    "buffers": "^0.1.1",
     "capnp-js-plugin": "^0.1.1",
     "gulp": "^3.8.7",
     "gulp-jshint": "^1.8.4",
     "gulp-nodefy": "0.0.0",
     "gulp-preprocess": "^1.1.1",
     "gulp-uglify": "^0.3.1",
+    "int64-native": "^0.3.2",
     "mocha": "^1.21.4",
-    "nodefy": "git://github.com/popham/nodefy#circular_refs"
+    "nodefy": "git://github.com/popham/nodefy#circular_refs",
+    "pegjs": "^0.8.0",
+    "ramda": "^0.8.0",
+    "when": "^3.6.3"
   },
   "scripts": {
     "postinstall": "npm run override-nodefy && (npm run build & npm run link-capnp & wait)",
