@@ -60,6 +60,7 @@ enum SecondEnum {
     sinko  @4;
 }
 
+# 0.5: (Upgrade(X) -> @0:X; @1:Int8; @2:Text;) for all fields to test upgrading
 struct SecondStruct {
     voidField        @0  :Void;
     boolField        @1  :Bool;
@@ -80,7 +81,7 @@ struct SecondStruct {
     anyField         @16 :AnyPointer;
     addedInt16Field  @34 :Int16 = -32015;
     addedEnumField   @35 :SecondEnum=quatro;
-    addedStructField @40 :SecondStruct = (boolList=[false,true,false], enumField=sinko, uint8Field=253);
+    addedStructField @40 :SecondStruct = (uint8Field = 253, enumField = sinko, addedInt16Field = -31945, boolList = [false,true,false]);
 
     voidList        @17 :List(Void);
     boolList        @18 :List(Bool);
@@ -99,8 +100,8 @@ struct SecondStruct {
     structList      @31 :List(SecondStruct);
     enumList        @32 :List(SecondEnum);
     anyList         @33 :List(WrapAny);
-    addedStructList @36 :List(SecondStruct);
+    addedStructList @36 :List(SecondStruct) = [(int8Field = -120, enumField = quatro, textList = ["asdf","qwerty"])];
     addedEnumList   @37 :List(SecondEnum);
-    addedTextList   @38 :List(Text);
-    addedInt8List   @39 :List(Int8);
+    addedTextList   @38 :List(Text)=["first","second"];
+    addedInt8List   @39 :List(Int8)=[1,-93];
 }
