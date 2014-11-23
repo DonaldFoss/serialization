@@ -548,12 +548,12 @@ var constants = require('./constants');
             })(),
             textField: (function() {
                 var Reader = reader.Text;
-                var arena = allocator._fromBase64("AQAAAAoAAAAAAAAAAAAAAA==").asReader();
+                var arena = allocator._fromBase64("AQAAAAMAAAA=").asReader();
                 return Reader._deref(arena, arena._root(), 0);
             })(),
             dataField: (function() {
                 var Reader = reader.Data;
-                var arena = allocator._fromBase64("AQAAAAIAAAA=").asReader();
+                var arena = allocator._fromBase64("AQAAAAMAAAA=").asReader();
                 return Reader._deref(arena, arena._root(), 0);
             })(),
             structField: (function() {
@@ -578,7 +578,7 @@ var constants = require('./constants');
             })(),
             int8List: (function() {
                 var Reader = reader.lists.Int8;
-                var arena = allocator._fromBase64("AQAAAAIAAAA=").asReader();
+                var arena = allocator._fromBase64("AQAAAAMAAAA=").asReader();
                 return Reader._deref(arena, arena._root(), 0);
             })(),
             int16List: (function() {
@@ -598,7 +598,7 @@ var constants = require('./constants');
             })(),
             uint8List: (function() {
                 var Reader = reader.lists.UInt8;
-                var arena = allocator._fromBase64("AQAAAAIAAAA=").asReader();
+                var arena = allocator._fromBase64("AQAAAAMAAAA=").asReader();
                 return Reader._deref(arena, arena._root(), 0);
             })(),
             uint16List: (function() {
@@ -628,12 +628,12 @@ var constants = require('./constants');
             })(),
             textList: (function() {
                 var Reader = reader.lists.Text;
-                var arena = allocator._fromBase64("AQAAAAoAAAAAAAAAAAAAAA==").asReader();
+                var arena = allocator._fromBase64("AQAAAAMAAAA=").asReader();
                 return Reader._deref(arena, arena._root(), 0);
             })(),
             dataList: (function() {
                 var Reader = reader.lists.Data;
-                var arena = allocator._fromBase64("AQAAAAIAAAA=").asReader();
+                var arena = allocator._fromBase64("AQAAAAMAAAA=").asReader();
                 return Reader._deref(arena, arena._root(), 0);
             })(),
             structList: (function() {
@@ -1297,12 +1297,12 @@ var constants = require('./constants');
             })(),
             textField: (function() {
                 var Reader = reader.Text;
-                var arena = allocator._fromBase64("AQAAAAoAAAAAAAAAAAAAAA==").asReader();
+                var arena = allocator._fromBase64("AQAAAAMAAAA=").asReader();
                 return Reader._deref(arena, arena._root(), 0);
             })(),
             dataField: (function() {
                 var Reader = reader.Data;
-                var arena = allocator._fromBase64("AQAAAAIAAAA=").asReader();
+                var arena = allocator._fromBase64("AQAAAAMAAAA=").asReader();
                 return Reader._deref(arena, arena._root(), 0);
             })(),
             structField: (function() {
@@ -1327,7 +1327,7 @@ var constants = require('./constants');
             })(),
             int8List: (function() {
                 var Reader = reader.lists.Int8;
-                var arena = allocator._fromBase64("AQAAAAIAAAA=").asReader();
+                var arena = allocator._fromBase64("AQAAAAMAAAA=").asReader();
                 return Reader._deref(arena, arena._root(), 0);
             })(),
             int16List: (function() {
@@ -1347,7 +1347,7 @@ var constants = require('./constants');
             })(),
             uint8List: (function() {
                 var Reader = reader.lists.UInt8;
-                var arena = allocator._fromBase64("AQAAAAIAAAA=").asReader();
+                var arena = allocator._fromBase64("AQAAAAMAAAA=").asReader();
                 return Reader._deref(arena, arena._root(), 0);
             })(),
             uint16List: (function() {
@@ -1377,12 +1377,12 @@ var constants = require('./constants');
             })(),
             textList: (function() {
                 var Reader = reader.lists.Text;
-                var arena = allocator._fromBase64("AQAAAAoAAAAAAAAAAAAAAA==").asReader();
+                var arena = allocator._fromBase64("AQAAAAMAAAA=").asReader();
                 return Reader._deref(arena, arena._root(), 0);
             })(),
             dataList: (function() {
                 var Reader = reader.lists.Data;
-                var arena = allocator._fromBase64("AQAAAAIAAAA=").asReader();
+                var arena = allocator._fromBase64("AQAAAAMAAAA=").asReader();
                 return Reader._deref(arena, arena._root(), 0);
             })(),
             structList: (function() {
@@ -1402,7 +1402,7 @@ var constants = require('./constants');
             })(),
             addedStructList: (function() {
                 var Reader = reader.lists.structure(scope['0xeab4d78288a545f6']);
-                var arena = allocator._fromBase64("AQAAAAAAAAA=").asReader();
+                var arena = allocator._fromBase64("AQAAAA8BAAAEAAAABwAaAACIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlAAAAFgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAUAAAAqAAAABQAAADoAAABhc2RmAAAAAHF3ZXJ0eQAA").asReader();
                 return Reader._deref(arena, arena._root(), 0);
             })(),
             addedEnumList: (function() {
@@ -1412,17 +1412,17 @@ var constants = require('./constants');
             })(),
             addedTextList: (function() {
                 var Reader = reader.lists.Text;
-                var arena = allocator._fromBase64("AQAAAAoAAAAAAAAAAAAAAA==").asReader();
+                var arena = allocator._fromBase64("AQAAABYAAAAFAAAAMgAAAAUAAAA6AAAAZmlyc3QAAABzZWNvbmQAAA==").asReader();
                 return Reader._deref(arena, arena._root(), 0);
             })(),
             addedInt8List: (function() {
                 var Reader = reader.lists.Int8;
-                var arena = allocator._fromBase64("AQAAAAIAAAA=").asReader();
+                var arena = allocator._fromBase64("AQAAABIAAAABowAAAAAAAA==").asReader();
                 return Reader._deref(arena, arena._root(), 0);
             })(),
             addedStructField: (function() {
                 var Reader = scope["0xeab4d78288a545f6"];
-                var arena = allocator._fromBase64("AAAAAAcAGgAAAAAAAAAAAAAAAAAAAAAA/QAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABRAAAAGQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAA==").asReader();
+                var arena = allocator._fromBase64("AAAAAAcAGgAAAAAAAAAAAAAAAAAAAAAA/QAAAAAAAAAAAAAAAAAAAAAAAAAEAMYBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABRAAAAGQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAA==").asReader();
                 return Reader._deref(arena, arena._root(), 0);
             })()
         };
