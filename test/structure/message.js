@@ -218,7 +218,6 @@ describe ('Message writing', function () {
                     done();
                 },
                 function (err) {
-                    debugger;
                     done();
                 }
             );
