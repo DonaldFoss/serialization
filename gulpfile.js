@@ -1,7 +1,7 @@
 var gulp = require('gulp');
 
 var jshint = require('gulp-jshint');
-var nodefy = require('gulp-nodefy');
+var nfy = require('gulp-nfy');
 var preprocess = require('gulp-preprocess');
 var uglify_ = require('gulp-uglify');
 
@@ -39,6 +39,6 @@ gulp.task('cjs', function () {
         .pipe(uglify())
         .pipe(jshint())
         .pipe(jshint.reporter('default'))
-        .pipe(nodefy())
+        .pipe(nfy())
         .pipe(gulp.dest('node'));
 });
