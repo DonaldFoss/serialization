@@ -3,311 +3,631 @@ var ramda = require('ramda');
 
 var reader = require('../testing.capnp.d/readers');
 
+var leaf = function (t, v) {
+    return {
+        type : t,
+        value : v
+    };
+};
+
+var leafize = function (t) {
+    return function (v) {
+        return leaf(t,v);
+    };
+};
+
+var upgrade = function (Type) {
+    return function (value) {
+        return {
+            type : Type,
+            value : {
+                prior : value,
+                boolField : leaf('Bool', false),
+                int8Field : leaf('Int8', 0),
+                uint32Field : leaf('UInt32', 0),
+                textField : leaf('Text', null),
+                dataField : leaf('Data', null),
+                structField : leaf('SecondStruct', null),
+                int16List : leaf('Int16List', []),
+                voidList : leaf('VoidList', []),
+                uint32List : leaf('UInt32List', []),
+                textList : leaf('TextList', []),
+                dataList : leaf('DataList', [])
+            }
+        };
+    };
+};
+
+var wrap = function (v) { return {
+    prior : v,
+    int8Field : leaf('Int8', 0),
+    textField : leaf('Text', "")
+}; };
+
+var priorize = ramda.mapObj(function (value) {
+    return {
+        type : 'Group',
+        value : wrap(value)
+    };
+});
+
+exports.leaf = leaf;
+exports.leafize = leafize;
+exports.priorize = priorize;
+exports.upgrade = upgrade;
+
 exports.firstDefaults = {
-    voidField : null,
-    boolField : false,
-    int8Field : 0,
-    int16Field : 0,
-    int32Field : 0,
-    int64Field : [0,0],
-    uint8Field : 0,
-    uint16Field : 0,
-    uint32Field : 0,
-    uint64Field : [0,0],
-    float32Field : 0.0,
-    float64Field : 0.0,
-    textField : '',
-    dataField : new Buffer(0),
-    // structField : ,
-    enumField : reader.FirstEnum.UNO,
-    // anyField : ,
-    voidList : [],
-    boolList : [],
-    int8List : [],
-    int16List : [],
-    int32List : [],
-    int64List : [],
-    uint8List : [],
-    uint16List : [],
-    uint32List : [],
-    uint64List : [],
-    float32List : [],
-    float64List : [],
-    textList : [],
-    dataList : [],
-    structList : [],
-    enumList : [],
-    anyList : []
+    voidField : leaf('Void', null),
+    boolField : leaf('Bool', false),
+    int8Field : leaf('Int8', 0),
+    int16Field : leaf('Int16', 0),
+    int32Field : leaf('Int32', 0),
+    int64Field : leaf('Int64', [0,0]),
+    uint8Field : leaf('UInt8', 0),
+    uint16Field : leaf('UInt16', 0),
+    uint32Field : leaf('UInt32', 0),
+    uint64Field : leaf('UInt64', [0,0]),
+    float32Field : leaf('Float32', 0.0),
+    float64Field : leaf('Float64', 0.0),
+    textField : leaf('Text', null),
+    dataField : leaf('Data', null),
+    structField : leaf('FirstStruct', null),
+    enumField : leaf('FirstEnum', reader.FirstEnum.UNO),
+    anyField : leaf('AnyPointer', null),
+
+    voidList : leaf('VoidList', []),
+    boolList : leaf('BoolList', []),
+    int8List : leaf('Int8List', []),
+    int16List : leaf('Int16List', []),
+    int32List : leaf('Int32List', []),
+    int64List : leaf('Int64List', []),
+    uint8List : leaf('UInt8List', []),
+    uint16List : leaf('UInt16List', []),
+    uint32List : leaf('UInt32List', []),
+    uint64List : leaf('UInt64List', []),
+    float32List : leaf('Float32List', []),
+    float64List : leaf('Float64List', []),
+    textList : leaf('TextList', []),
+    dataList : leaf('DataList', []),
+    structList : leaf('FirstStructList', []),
+    enumList : leaf('FirstEnumList', []),
+    anyList : leaf('AnyList', [])
 };
 
-exports.secondDefaults = ramda.mixin(exports.firstDefaults, {
-    addedInt16Field : -32015,
-    addedEnumField : reader.SecondEnum.QUATRO,
-    // addedStructField : ,
-    addedStructList : [],
-    addedEnumList : [],
-    addedTextList : ['first', 'second'],
-    addedInt8List : [1,-93]
-});
+exports.secondDefaults = ramda.mixin(priorize(exports.firstDefaults), priorize({
+    // Override upgraded types
+    structField : leaf('SecondStruct', null),
+    enumField : leaf('SecondEnum', reader.SecondEnum.UNO),
 
-var listStrictAssert = function (capnp, ell) {
-    assert.strictEqual(capnp.length(), ell.length);
-    capnp.forEach(function (d, i) { assert.strictEqual(d, ell[i]); });
+    addedInt16Field : leaf('Int16', -32015),
+    addedEnumField : leaf('SecondEnum', reader.SecondEnum.QUATRO),
+    addedStructField : leaf('SecondStruct', priorize({
+        uint8Field : leaf('UInt8', 253),
+        enumField : leaf('SecondEnum', reader.SecondEnum.SINKO),
+        addedInt16Field : leaf('Int16', -31945),
+        boolList : leaf(
+            'BoolList',
+            [false, true, false].map(leafize('Bool'))
+        )
+    })),
+
+    voidList : leaf('VoidWrapList', []),
+    boolList : leaf('BoolList', []),
+    int8List : leaf('Int8WrapList', []),
+    int16List : leaf('Int16WrapList', []),
+    int32List : leaf('Int32WrapList', []),
+    int64List : leaf('Int64WrapList', []),
+    uint8List : leaf('UInt8WrapList', []),
+    uint16List : leaf('UInt16WrapList', []),
+    uint32List : leaf('UInt32WrapList', []),
+    uint64List : leaf('UInt64WrapList', []),
+    float32List : leaf('Float32WrapList', []),
+    float64List : leaf('Float64WrapList', []),
+    textList : leaf('UpgradeTextList', []),
+    dataList : leaf('UpgradeDataList', []),
+    structList : leaf('SecondStructList', []),
+    enumList : leaf('SecondEnumWrapList', []),
+    addedStructList : leaf(
+        'UpgradeSecondStructList',
+        [{
+            int8Field : leaf('Int8', -120),
+            enumField : leaf('SecondEnum', reader.SecondEnum.QUATRO),
+            textList : leaf(
+                'TextList',
+                ['asdf', 'qwerty']
+                    .map(leafize('Text'))
+            )
+        }  ].map(priorize)
+            .map(leafize('SecondStruct'))
+            .map(upgrade('UpgradeSecondStruct'))
+    ),
+    addedEnumList : leaf('SecondEnumWrapList', []),
+    addedTextList : leaf(
+        'UpgradeTextList',
+        ['first', 'second', 'third']
+            .map(leafize('Text'))
+            .map(upgrade('UpgradeText'))
+    ),
+    addedInt8List : leaf(
+        'Int8WrapList',
+        [1, -93, 4].map(leafize('Int8')).map(wrap).map(leafize('Int8Wrap'))
+    )
+}));
+
+function assertEq(capnp, struct) {
+    function list(capnp, ell) {
+        switch (ell.type) {
+        case 'VoidList':
+        case 'BoolList':
+        case 'Int8List':
+        case 'Int16List':
+        case 'Int32List':
+        case 'UInt8List':
+        case 'UInt16List':
+        case 'UInt32List':
+        case 'Float64List':
+        case 'FirstEnumList':
+        case 'SecondEnumList':
+            capnp.forEach(function (v, i) {
+                assert.strictEqual(v, ell.value[i].value);
+            });
+            break;
+
+        case 'Int64List':
+        case 'UInt64List':
+            capnp.forEach(function (v, i) {
+                assert.strictEqual(v[0], ell.value[i].value[0]);
+                assert.strictEqual(v[1], ell.value[i].value[1]);
+            });
+            break;
+
+        case 'Float32List':
+            capnp.forEach(function (v, i) {
+                var arr = new Float32Array(1);
+                arr[0] = ell.value[i].value;
+                assert.strictEqual(v, arr[0]);
+            });
+            break;
+
+        case 'TextList':
+            capnp.forEach(function (v, i) {
+                assert.strictEqual(v.toString(), ell.value[i].value);
+            });
+            break;
+
+        case 'DataList':
+            capnp.forEach(function (v, i) {
+                assert.deepEqual(v.raw(), ell.value[i].value);
+            });
+            break;
+
+        case 'FirstStructList':
+        case 'SecondStructList':
+        case 'VoidWrapList':
+        case 'BoolWrapList':
+        case 'Int8WrapList':
+        case 'Int16WrapList':
+        case 'Int32WrapList':
+        case 'Int64WrapList':
+        case 'UInt8WrapList':
+        case 'UInt16WrapList':
+        case 'UInt32WrapList':
+        case 'UInt64WrapList':
+        case 'Float32WrapList':
+        case 'Float64WrapList':
+        case 'SecondEnumWrapList':
+        case 'UpgradeDataList':
+        case 'UpgradeTextList':
+        case 'UpgradeSecondStructList':
+            capnp.forEach(function (v, i) {
+                assertEq(v, ell.value[i].value);
+            });
+            break;
+
+        case 'AnyList':
+            if (ell.value.length > 0)
+                throw new Error('Cannot assert AnyPointer equivalence');
+            break;
+
+        default:
+            throw new Error('Unhandled assertion value: '+ell.type);
+        }
+
+        assert.strictEqual(capnp.length(), ell.value.length);
+    }
+
+    for (var k in struct) {
+        var suffix = k[0].toUpperCase() + k.slice(1);
+
+        var c;
+        var f = struct[k];
+        switch (f.type) {
+        case 'Void':
+        case 'Bool':
+        case 'Int8':
+        case 'Int16':
+        case 'Int32':
+        case 'UInt8':
+        case 'UInt16':
+        case 'UInt32':
+        case 'Float64':
+        case 'FirstEnum':
+        case 'SecondEnum':
+            c = capnp['get'+suffix]();
+            assert.strictEqual(c, f.value);
+            break;
+
+        case 'Int64':
+        case 'UInt64':
+            c = capnp['get'+suffix]();
+            assert.strictEqual(c[0], f.value[0]);
+            assert.strictEqual(c[1], f.value[1]);
+            break;
+
+        case 'Float32':
+            c = capnp['get'+suffix]();
+            var arr = new Float32Array(1);
+            arr[0] = f.value;
+            assert.strictEqual(c, arr[0]);
+            break;
+
+        case 'Text':
+            if (f.value === null) {
+                assert(!capnp['has'+suffix]());
+            } else {
+                c = capnp['get'+suffix]();
+                assert.strictEqual(c.toString(), f.value);
+            }
+            break;
+
+        case 'Data':
+            if (f.value === null) {
+                assert(!capnp['has'+suffix]());
+            } else {
+                c = capnp['get'+suffix]();
+                assert.deepEqual(c.raw(), f.value);
+            }
+            break;
+
+        case 'FirstStruct':
+        case 'SecondStruct':
+        case 'SecondEnumWrap':
+        case 'VoidWrap':
+        case 'BoolWrap':
+        case 'Int8Wrap':
+        case 'Int16Wrap':
+        case 'Int32Wrap':
+        case 'Int64Wrap':
+        case 'UInt8Wrap':
+        case 'UInt16Wrap':
+        case 'UInt32Wrap':
+        case 'UInt64Wrap':
+        case 'Float32Wrap':
+        case 'Float64Wrap':
+        case 'UpgradeText':
+        case 'UpgradeData':
+        case 'UpgradeSecondStruct':
+            if (f.value === null) {
+                assert(!capnp['has'+suffix]());
+            } else {
+                c = capnp['get'+suffix]();
+                assertEq(c, f.value);
+            }
+            break;
+
+        case 'Group':
+            c = capnp['get'+suffix]();
+            assertEq(c, f.value);
+            break;
+
+        case 'AnyPointer':
+            if (f.value === null) {
+                assert(!capnp['has'+suffix]());
+            } else {
+                /*
+                 * The data structures can support
+                 * `anyField->somePointerParametrization`--switch on f.type to
+                 * cast the AnyPointer, then continue recurring.
+                 */
+                throw new Error('Non-null AnyPointer found');
+            }
+            break;
+
+        default:
+            if (f.value === null) {
+                assert(!capnp['has'+suffix]());
+            } else {
+                c = capnp['get'+suffix]();
+                list(c, f);
+            }
+        }
+    }
+}
+
+exports.validate = assertEq;
+
+function inject(capnp, struct) {
+    function list(capnp, ell) {
+        switch (ell.type) {
+        case 'VoidList':
+            break;
+
+        case 'BoolList':
+        case 'Int8List':
+        case 'Int16List':
+        case 'Int32List':
+        case 'Int64List':
+        case 'UInt8List':
+        case 'UInt16List':
+        case 'UInt32List':
+        case 'UInt64List':
+        case 'Float32List':
+        case 'Float64List':
+        case 'TextList':
+        case 'DataList':
+        case 'FirstEnumList':
+        case 'SecondEnumList':
+            ell.value.forEach(function (f, i) { capnp.set(i, f.value); });
+            break;
+
+        case 'FirstStructList':
+        case 'SecondStructList':
+        case 'UpgradeSecondStructList':
+        case 'VoidWrapList':
+        case 'BoolWrapList':
+        case 'Int8WrapList':
+        case 'Int16WrapList':
+        case 'Int32WrapList':
+        case 'Int64WrapList':
+        case 'UInt8WrapList':
+        case 'UInt16WrapList':
+        case 'UInt32WrapList':
+        case 'UInt64WrapList':
+        case 'Float32WrapList':
+        case 'Float64WrapList':
+        case 'UpgradeTextList':
+        case 'UpgradeDataList':
+        case 'SecondEnumWrapList':
+        case 'AnyWrapList':
+            capnp.forEach(function(item, i) {
+                inject(item, ell.value[i].value);
+            });
+            break;
+
+        case 'AnyList':
+            ell.value.forEach(function (f, i) { capnp.set(i, f.value); });
+            break;
+
+        default:
+            throw new Error('Unhandled injection value: '+f.type);
+        }
+    }
+
+    for (var k in struct) {
+        var suffix = k[0].toUpperCase() + k.slice(1);
+        var f = struct[k];
+        switch (f.type) {
+        case 'Void':
+            break;
+
+        case 'Bool':
+        case 'Int8':
+        case 'Int16':
+        case 'Int32':
+        case 'Int64':
+        case 'UInt8':
+        case 'UInt16':
+        case 'UInt32':
+        case 'UInt64':
+        case 'Float32':
+        case 'Float64':
+        case 'FirstEnum':
+        case 'SecondEnum':
+            capnp['set'+suffix](f.value);
+            break;
+
+        case 'Text':
+        case 'Data':
+            if (f.value !== null) capnp['set'+suffix](f.value);
+            break;
+
+        case 'AnyPointer':
+            if (f.value !== null) throw new Error('Non-null AnyPointer found');
+            break;
+
+        case 'Group':
+        case 'FirstStruct':
+        case 'SecondStruct':
+        case 'UpgradeSecondStruct':
+        case 'SecondEnumWrap':
+        case 'VoidWrap':
+        case 'BoolWrap':
+        case 'Int8Wrap':
+        case 'Int16Wrap':
+        case 'Int32Wrap':
+        case 'Int64Wrap':
+        case 'UInt8Wrap':
+        case 'UInt16Wrap':
+        case 'UInt32Wrap':
+        case 'UInt64Wrap':
+        case 'Float32Wrap':
+        case 'Float64Wrap':
+        case 'UpgradeText':
+        case 'UpgradeData':
+            if (f.value !== null) inject(capnp['get'+suffix](), f.value);
+            break;
+
+        default:
+            if (f.value !== null) list(capnp['init'+suffix](f.value.length), f);
+        }
+    }
+
+    return capnp;
+}
+
+exports.inject = inject;
+
+var firstSf = {
+    boolField : leaf('Bool', false),
+    int8Field : leaf('Int8', -102),
+    int16Field : leaf('Int16', 21821),
+    int32Field : leaf('Int32', -1834298),
+    int64Field : leaf('Int64', [293834,11284742]),
+    uint8Field : leaf('UInt8', 10),
+    uint16Field : leaf('UInt16', 31103),
+    uint32Field : leaf('UInt32', 1938484),
+    uint64Field : leaf('UInt64', [19838492,12093022]),
+    float32Field : leaf('Float32', 1903.444),
+    float64Field : leaf('Float64', 12.422333),
+    textField : leaf('Text', 'Inner Text Field'),
+    dataField : leaf('Data', (function () {
+        var b = new Buffer(200);
+        b.fill(0);
+        return b;
+    })()), // Make child + its data larger than root as a test precondition
+    enumField : leaf('FirstEnum', reader.FirstEnum.DOS),
+
+    int32List : leaf('Int32List', [0, 8008, 0, -93445].map(leafize('Int32'))),
+    enumList : leaf('FirstEnumList', [reader.FirstEnum.UNO, reader.FirstEnum.TRES, reader.FirstEnum.UNO].map(leafize('FirstEnum'))),
 };
 
-var listDeepAssert = function (capnp, ell) {
-    assert.strictEqual(capnp.length(), ell.length);
-    capnp.forEach(function (d, i) { assert.deepEqual(d, ell[i]); });
+exports.first = {
+    boolField : leaf('Bool', true),
+    int8Field : leaf('Int8', -121),
+    int16Field : leaf('Int16', -31033),
+    int32Field : leaf('Int32', -1148542),
+    int64Field : leaf('Int64', [-100,82933]),
+    uint8Field : leaf('UInt8', 204),
+    uint16Field : leaf('UInt16', 62958),
+    uint32Field : leaf('UInt32', 2046733),
+    uint64Field : leaf('UInt64', [243332333,4958585]),
+    float32Field : leaf('Float32', 34.4945),
+    float64Field : leaf('Float64', -1994398.344),
+    textField : leaf('Text', 'Qwert Asdf'),
+    dataField : leaf('Data', new Buffer([113, 119, 101, 120])),
+    structField : leaf('FirstStruct', firstSf),
+    enumField : leaf('FirstEnum', reader.FirstEnum.TRES),
+
+    voidList : leaf('VoidList', [null, null, null, null, null].map(leafize('Void'))),
+    boolList : leaf('BoolList', [true, false, true, true].map(leafize('Bool'))),
+    int8List : leaf('Int8List', [0, 98, -23, 0].map(leafize('Int8'))),
+    int16List : leaf('Int16List', [0, -29848, 0, 3494].map(leafize('Int16'))),
+    int32List : leaf('Int32List', [0, -928484, -2945, 21245].map(leafize('Int32'))),
+    int64List : leaf('Int64List', [[1233494595,932676333], [0,0], [1344,567775]].map(leafize('Int64'))),
+    uint8List : leaf('UInt8List', [239, 0, 10, 103].map(leafize('UInt8'))),
+    uint16List : leaf('UInt16List', [0, 39844, 6].map(leafize('UInt16'))),
+    uint32List : leaf('UInt32List', [0, 2093827631, 44].map(leafize('UInt32'))),
+    uint64List : leaf('UInt64List', [[2943,9183], [0,0], [1393994,1145566]].map(leafize('UInt64'))),
+    float32List : leaf('Float32List', [1.4848, -0.595933, 0.003455532].map(leafize('Float32'))),
+    float64List : leaf('Float64List', [92.3333211243, -2239.44242444, 3543.793993].map(leafize('Float64'))),
+    textList : leaf('TextList', ['`outerSet` list text at 0', '`outerSet` list text at 1', 'one more text-list member'].map(leafize('Text'))),
+    dataList : leaf('DataList', [new Buffer([97, 115, 100, 102]), new Buffer(0), new Buffer(0)].map(leafize('Data'))),
+    enumList : leaf('FirstEnumList', [reader.FirstEnum.UNO, reader.FirstEnum.DOS, reader.FirstEnum.UNO].map(leafize('FirstEnum'))),
 };
 
-var listDataAssert = function (capnp, ell) {
-    assert.strictEqual(capnp.length(), ell.length);
-    capnp.forEach(function (d, i) { assert.deepEqual(d.raw(), ell[i]); });
-};
+var secondSf = ramda.mixin(priorize(firstSf), priorize({
+    enumField : leaf('SecondEnum', reader.SecondEnum.DOS),
+    int32List : leaf(
+        'Int32WrapList',
+        firstSf.int32List.value.map(wrap).map(leafize('Int32Wrap'))
+    ),
+    enumList : leaf(
+        'SecondEnumWrapList',
+        [reader.SecondEnum.UNO, reader.SecondEnum.TRES, reader.SecondEnum.UNO]
+            .map(leafize('SecondEnumWrap'))
+    ),
 
-var listTextAssert = function (capnp, ell) {
-    assert.strictEqual(capnp.length(), ell.length);
-    capnp.forEach(function (d, i) { assert.strictEqual(d.toString(), ell[i]); });
-};
+    addedInt16Field : leaf('Int16', 194),
+    addedEnumField : leaf('SecondEnum', reader.SecondEnum.UNO),
 
-var listF32Assert = function (capnp, ell) {
-    assert.strictEqual(capnp.length(), ell.length);
-    var ta = new Float32Array(1);
-    capnp.forEach(function (d, i) {
-        ta[0] = ell[i];
-        assert.strictEqual(d, ta[0]);
-    });
-};
+    addedEnumList : leaf(
+        'SecondEnumWrapList',
+        [reader.SecondEnum.DOS, reader.SecondEnum.TRES, reader.SecondEnum.QUATRO]
+            .map(leafize('SecondEnumWrap'))
+    ),
+    addedTextList : leaf(
+        'UpgradeTextList',
+        ['1', '2', '3']
+            .map(leafize('Text'))
+            .map(upgrade('UpgradeText'))
+    ),
+    addedInt8List : leaf(
+        'Int8WrapList',
+        [1, 2, 43, -34].map(leafize('Int8')).map(wrap).map(leafize('Int8Wrap'))
+    )
+}));
 
-var listF64Assert = function (capnp, ell) {
-    assert.strictEqual(capnp.length(), ell.length);
-    var ta = new Float64Array(1);
-    capnp.forEach(function (d, i) {
-        ta[0] = ell[i];
-        assert.strictEqual(d, ta[0]);
-    });
-};
+exports.second = ramda.mixin(priorize(exports.first), priorize({
+    // Override the upgraded types
+    enumField : leaf('SecondEnum', exports.first.enumField.value),
+    structField : leaf('SecondStruct', secondSf),
 
-exports.firstValidate = function (root, values) {
-    // Handle `anyField` and `structField` externally.
-    assert.strictEqual(root.getVoidField(), values.voidField);
-    assert.strictEqual(root.getBoolField(), values.boolField);
-    assert.strictEqual(root.getInt8Field(), values.int8Field);
-    assert.strictEqual(root.getInt16Field(), values.int16Field);
-    assert.strictEqual(root.getInt32Field(), values.int32Field);
-    assert.deepEqual(root.getInt64Field(), values.int64Field);
-    assert.strictEqual(root.getUint8Field(), values.uint8Field);
-    assert.strictEqual(root.getUint16Field(), values.uint16Field);
-    assert.strictEqual(root.getUint32Field(), values.uint32Field);
-    assert.deepEqual(root.getUint64Field(), values.uint64Field);
-    assert.strictEqual(root.getFloat32Field(), (function () {
-        var ta = new Float32Array(1);
-        ta[0] = values.float32Field;
-        return ta[0];
-    })());
-    assert.strictEqual(root.getFloat64Field(), (function () {
-        var ta = new Float64Array(1);
-        ta[0] = values.float64Field;
-        return ta[0];
-    })());
-    assert.strictEqual(root.getTextField().toString(), values.textField);
-    assert.deepEqual(root.getDataField().raw(), values.dataField);
-    assert.strictEqual(root.getEnumField(), values.enumField);
+    voidList : leaf(
+        'VoidWrapList',
+        exports.first.voidList.value.map(wrap).map(leafize('VoidWrap'))
+    ),
+    int8List : leaf(
+        'Int8WrapList',
+        exports.first.int8List.value.map(wrap).map(leafize('Int8Wrap'))
+    ),
+    int16List : leaf(
+        'Int16WrapList',
+        exports.first.int16List.value.map(wrap).map(leafize('Int16Wrap'))
+    ),
+    int32List : leaf(
+        'Int32WrapList',
+        exports.first.int32List.value.map(wrap).map(leafize('Int32Wrap'))
+    ),
+    int64List : leaf(
+        'Int64WrapList',
+        exports.first.int64List.value.map(wrap).map(leafize('Int64Wrap'))
+    ),
+    uint8List : leaf(
+        'UInt8WrapList',
+        exports.first.uint8List.value.map(wrap).map(leafize('UInt8Wrap'))
+    ),
+    uint16List : leaf(
+        'UInt16WrapList',
+        exports.first.uint16List.value.map(wrap).map(leafize('UInt16Wrap'))
+    ),
+    uint32List : leaf(
+        'UInt32WrapList',
+        exports.first.uint32List.value.map(wrap).map(leafize('UInt32Wrap'))
+    ),
+    uint64List : leaf(
+        'UInt64WrapList',
+        exports.first.uint64List.value.map(wrap).map(leafize('UInt64Wrap'))
+    ),
+    float32List : leaf(
+        'Float32WrapList',
+        exports.first.float32List.value.map(wrap).map(leafize('Float32Wrap'))
+    ),
+    float64List : leaf(
+        'Float64WrapList',
+        exports.first.float64List.value.map(wrap).map(leafize('Float64Wrap'))
+    ),
+    enumList : leaf(
+        'SecondEnumWrapList',
+        [reader.SecondEnum.UNO, reader.SecondEnum.DOS, reader.SecondEnum.UNO]
+            .map(leafize('SecondEnumWrap'))
+    ),
 
-    // Handle `structList` and `anyList` externally.
-    listStrictAssert(root.getVoidList(), values.voidList);
-    listStrictAssert(root.getBoolList(), values.boolList);
-    listStrictAssert(root.getInt8List(), values.int8List);
-    listStrictAssert(root.getInt16List(), values.int16List);
-    listStrictAssert(root.getInt32List(), values.int32List);
-    listDeepAssert(root.getInt64List(), values.int64List);
-    listStrictAssert(root.getUint8List(), values.uint8List);
-    listStrictAssert(root.getUint16List(), values.uint16List);
-    listStrictAssert(root.getUint32List(), values.uint32List);
-    listDeepAssert(root.getUint64List(), values.uint64List);
-    listF32Assert(root.getFloat32List(), values.float32List);
-    listF64Assert(root.getFloat64List(), values.float64List);
-    listTextAssert(root.getTextList(), values.textList);
-    listDataAssert(root.getDataList(), values.dataList);
-    listStrictAssert(root.getEnumList(), values.enumList);
-};
+    addedInt16Field : leaf('Int16', -9194),
+    addedEnumField : leaf('SecondEnum', reader.SecondEnum.SINKO),
 
-exports.secondValidate = function (root, values) {
-    exports.firstValidate(root, values);
-
-    assert.strictEqual(root.getAddedInt16Field(), values.addedInt16Field);
-    assert.strictEqual(root.getAddedEnumField(), values.addedEnumField);
-
-    listStrictAssert(root.getAddedEnumList(), values.addedEnumList);
-    listTextAssert(root.getAddedTextList(), values.addedTextList);
-    listStrictAssert(root.getAddedInt8List(), values.addedInt8List);
-};
-
-exports.firstInject = function (base, values) {
-    base.setBoolField(values.boolField);
-    base.setInt8Field(values.int8Field);
-    base.setInt16Field(values.int16Field);
-    base.setInt32Field(values.int32Field);
-    base.setInt64Field(values.int64Field);
-    base.setUint8Field(values.uint8Field);
-    base.setUint16Field(values.uint16Field);
-    base.setUint32Field(values.uint32Field);
-    base.setUint64Field(values.uint64Field);
-    base.setFloat32Field(values.float32Field);
-    base.setFloat64Field(values.float64Field);
-    base.setTextField(values.textField);
-    base.setDataField(values.dataField);
-    if (values.structField) base.setStructField(values.structField);
-    base.setEnumField(values.enumField);
-    if (values.anyField) base.setAnyField(values.anyField);
-
-    var ell;
-
-    ell = base.initVoidList(values.voidList.length);
-
-    ell = base.initBoolList(values.boolList.length);
-    values.boolList.forEach(function (v, i) { ell.set(i, v); });
-
-    ell = base.initInt8List(values.int8List.length);
-    values.int8List.forEach(function (v, i) { ell.set(i, v); });
-
-    ell = base.initInt16List(values.int16List.length);
-    values.int16List.forEach(function (v, i) { ell.set(i, v); });
-
-    ell = base.initInt32List(values.int32List.length);
-    values.int32List.forEach(function (v, i) { ell.set(i, v); });
-
-    ell = base.initInt64List(values.int64List.length);
-    values.int64List.forEach(function (v, i) { ell.set(i, v); });
-
-    ell = base.initUint8List(values.uint8List.length);
-    values.uint8List.forEach(function (v, i) { ell.set(i, v); });
-
-    ell = base.initUint16List(values.uint16List.length);
-    values.uint16List.forEach(function (v, i) { ell.set(i, v); });
-
-    ell = base.initUint32List(values.uint32List.length);
-    values.uint32List.forEach(function (v, i) { ell.set(i, v); });
-
-    ell = base.initUint64List(values.uint64List.length);
-    values.uint64List.forEach(function (v, i) { ell.set(i, v); });
-
-    ell = base.initFloat32List(values.float32List.length);
-    values.float32List.forEach(function (v, i) { ell.set(i, v); });
-
-    ell = base.initFloat64List(values.float64List.length);
-    values.float64List.forEach(function (v, i) { ell.set(i, v); });
-
-    ell = base.initTextList(values.textList.length);
-    values.textList.forEach(function (v, i) { ell.set(i, v); });
-
-    ell = base.initDataList(values.dataList.length);
-    values.dataList.forEach(function (v, i) { ell.set(i, v); });
-
-    ell = base.initStructList(values.structList.length);
-    values.structList.forEach(function (v, i) { ell.set(i, v); });
-
-    ell = base.initEnumList(values.enumList.length);
-    values.enumList.forEach(function (v, i) { ell.set(i, v); });
-
-    ell = base.initAnyList(values.anyList.length);
-    values.anyList.forEach(function (v, i) { ell.set(i, v); });
-
-    return base;
-};
-
-exports.secondInject = function (base, values) {
-    exports.firstInject(base, values);
-
-    base.setAddedInt16Field(values.addedInt16Field);
-    base.setAddedEnumField(values.addedEnumField);
-    if (values.addedStructField) base.setAddedStructField(values.addedStructField);
-
-    var ell;
-
-    ell = base.initAddedStructList(values.addedStructList.length);
-    values.addedStructList.forEach(function (v, i) { ell.set(i, v); });
-
-    ell = base.initAddedEnumList(values.addedEnumList.length);
-    values.addedEnumList.forEach(function (v, i) { ell.set(i, v); });
-
-    ell = base.initAddedTextList(values.addedTextList.length);
-    values.addedTextList.forEach(function (v, i) { ell.set(i, v); });
-
-    ell = base.initAddedInt8List(values.addedInt8List.length);
-    values.addedInt8List.forEach(function (v, i) { ell.set(i, v); });
-
-    return base;
-};
-
-exports.firstRoot = ramda.mixin(exports.firstDefaults, {
-    boolField : true,
-    int8Field : -121,
-    int16Field : -31033,
-    int32Field : -1148542,
-    int64Field : [-100,82933],
-    uint8Field : 204,
-    uint16Field : 62958,
-    uint32Field : 2046733,
-    uint64Field : [243332333,4958585],
-    float32Field : 34.4945,
-    float64Field : -1994398.344,
-    textField : 'Qwert Asdf',
-    dataField : new Buffer([0x71, 0x77, 0x65, 0x72]),
-    enumField : reader.FirstEnum.TRES,
-
-    voidList : [null, null],
-    boolList : [true, false],
-    int8List : [0, 98],
-    int16List : [0, -29848],
-    int32List : [0, -928484],
-    int64List : [[1233494595,932676333], [0,0]],
-    uint8List : [239, 0],
-    uint16List : [0, 39844],
-    uint32List : [0, 2093827631],
-    uint64List : [[2943,9183], [0,0]],
-    float32List : [1.4848, -0.595933],
-    float64List : [92.3333211243, -2239.44242444],
-    textList : ['`outerSet` list text at 0', '`outerSet` list text at 1'],
-    dataList : [new Buffer([0x61, 0x73, 0x64, 0x66]), new Buffer(0), new Buffer(0)],
-    enumList : [reader.FirstEnum.UNO, reader.FirstEnum.DOS],
-});
-
-exports.firstSf = ramda.mixin(exports.firstDefaults, {
-    boolField : false,
-    int8Field : -102,
-    int16Field : 21821,
-    int32Field : -1834298,
-    int64Field : [293834,11284742],
-    uint8Field : 10,
-    uint16Field : 31103,
-    uint32Field : 1938484,
-    uint64Field : [19838492,12093022],
-    float32Field : 1903.444,
-    float64Field : 12.422333,
-    textField : 'Inner Text Field',
-    dataField : new Buffer([0x74, 0x6d, 0x69]),
-    enumField : reader.FirstEnum.DOS,
-
-    int32List : [0, 8008, 0, -93445]
-});
-
-exports.secondRoot = ramda.mixin(exports.secondDefaults, exports.firstRoot);
-exports.secondRoot = ramda.mixin(exports.secondRoot, {
-    addedInt16Field : -9194,
-    addedEnumField : reader.SecondEnum.SINKO,
-
-    addedEnumList : [reader.SecondEnum.UNO, reader.SecondEnum.TRES, reader.SecondEnum.DOS],
-    addedTextList : ["not first", "not second"],
-    addedInt8List : [6, -94]
-});
-
-exports.secondSf = ramda.mixin(exports.secondDefaults, exports.firstSf);
-exports.secondSf = ramda.mixin(exports.secondSf, {
-    addedInt16Field : 194,
-    addedEnumField : reader.SecondEnum.UNO,
-
-    addedEnumList : [reader.SecondEnum.DOS, reader.SecondEnum.TRES, reader.SecondEnum.QUATRO],
-    addedTextList : ["1", "2"],
-    addedInt8List : [1, 2, 43]
-});
+    addedEnumList : leaf(
+        'SecondEnumWrapList',
+        [reader.SecondEnum.UNO, reader.SecondEnum.TRES, reader.SecondEnum.DOS]
+            .map(leafize('SecondEnumWrap'))
+    ),
+    addedTextList : leaf(
+        'UpgradeTextList',
+        ['not first', 'not second', 'not third', 'not fourth', 'not fifth']
+            .map(leafize('Text'))
+            .map(upgrade('UpgradeText'))
+    ),
+    addedInt8List : leaf(
+        'Int8WrapList',
+        [6, -94, -103, 3].map(leafize('Int8')).map(wrap).map(leafize('Int8Wrap'))
+    )
+}));
