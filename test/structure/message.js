@@ -13,96 +13,195 @@ var reader = require('../testing.capnp.d/readers');
 
 var alloc = new Allocator();
 
-var sl1 = ramda.mixin(fixture.secondRoot, {
-    int8Field : -87,
-    uint16Field : 31049,
-    textField : 'sl1 text',
-    addedEnumField : reader.SecondEnum.QUATRO
-});
+var sl1 = ramda.mixin(fixture.second, fixture.priorize({
+    int8Field : fixture.leaf('Int8', -87),
+    uint16Field : fixture.leaf('UInt16', 31049),
+    textField : fixture.leaf('Text', 'sl1 text'),
+    addedEnumField : fixture.leaf('SecondEnum', reader.SecondEnum.QUATRO)
+}));
 
-var sl2 = ramda.mixin(fixture.secondSf, {
-    int16Field : -8700,
-    dataField : new Buffer([0x61, 0x79, 0x65]),
-    addedEnumField : reader.SecondEnum.UNO
-});
+var sl2 = ramda.mixin(fixture.second, fixture.priorize({
+    int16Field : fixture.leaf('Int16', -8700),
+    dataField : fixture.leaf('Data', new Buffer([86, 104, 99])),
+    addedEnumField : fixture.leaf('SecondEnum', reader.SecondEnum.UNO)
+}));
 
-var second = ramda.mixin(fixture.secondRoot, {
-    structField : fixture.secondSf,
-    structList : [sl1, sl2]
-});
+var second = ramda.mixin(fixture.second, fixture.priorize({
+    structList : fixture.leaf(
+        'SecondStructList',
+        [sl2, sl1, sl2].map(fixture.leafize('SecondStruct'))
+    )
+}));
 
 var invInvEnum = { uno:0, dos:1, tres:2, quatro:3, sinko:4 };
 var invEnum =    ['uno', 'dos', 'tres', 'quatro', 'sinko'];
 
-var toolInput = function (obj) {
-    function datum(value) {
-
-        if (Array.isArray(value)) {
-            // 64 bit integral
-            var prefix;
-            var hi;
-            var lo;
-            if (value[0] < 0) {
-                // [-x,y] -> -[x,y] -> -(x.concat(y))
-                prefix = '-0x';
-                if (value[1] === 0) {
-                    // Carry the overflow.
-                    lo = '0';
-                    hi = ((~value[0] + 1 + 1)>>>0).toString(16);
-                } else {
-                    lo = ((~value[1] + 1)>>>0).toString(16);
-                    hi = ((~value[0]    )>>>0).toString(16);
-                }
-            } else {
-                prefix = '0x';
-                lo = value[1].toString(16);
-                hi = value[0].toString(16);
-            }
-
-            var zeros = "00000000";
-            return prefix + hi.toString(16) + zeros.substring(0, 8-lo.length) + lo;
-        } else if (typeof value === 'string')
-            return '"'+value+'"';
-        else if (value instanceof Buffer)
-            return '"'+value.toString('ascii')+'"';
-        else if (value === null)
-            return 'void';
-        else if (typeof value === 'object')
-            return toolInput(value)
-        else
-            return value;
+var join64bit = function (value) {
+    // 64 bit integral
+    var prefix;
+    var hi;
+    var lo;
+    if (value[0] < 0) {
+        // [-x,y] -> -[x,y] -> -(x.concat(y))
+        prefix = '-0x';
+        if (value[1] === 0) {
+            // Carry the overflow.
+            lo = '0';
+            hi = ((~value[0] + 1 + 1)>>>0).toString(16);
+        } else {
+            lo = ((~value[1] + 1)>>>0).toString(16);
+            hi = ((~value[0]    )>>>0).toString(16);
+        }
+    } else {
+        prefix = '0x';
+        lo = value[1].toString(16);
+        hi = value[0].toString(16);
     }
 
-    var output = [];
-    for (var k in obj) {
-        if (k.slice(k.length-4) === 'List') {
-            var ell=[];
-            switch (k) {
-            case 'enumList':
-            case 'addedEnumList':
-                ell = obj[k].map(function (e) { return invEnum[e]; });
-                break;
-            default:
-                for (var i=0; i<obj[k].length; ++i) {
-                    ell.push(datum(obj[k][i]));
-                }
-            }
-            output.push(k+' = '+'['+ell.join(', ')+']');
-        } else if (k.slice(k.length-5) === 'Field') {
-            switch (k) {
-            case 'enumField':
-            case 'addedEnumField':
-                output.push(k+' = '+invEnum[obj[k]]);
-                break;
-            default:
-                output.push(k+' = '+datum(obj[k]));
-            }
-        } else {
-            throw new Error('Unrecognized key: '+k);
+    var zeros = "00000000";
+    return prefix + hi.toString(16) + zeros.substring(0, 8-lo.length) + lo;
+};
+
+/*
+ * Compute input for the Capnproto encoder.
+ *
+ * struct - fieldName -> {type : x, value : y}
+ */
+var toolInput = function (struct) {
+    function isPointer(f) {
+        switch (f.type) {
+        case 'Text':
+        case 'Data':
+        case 'AnyPointer':
+        case 'FirstStruct':
+        case 'SecondStruct':
+        case 'VoidList':
+        case 'BoolList':
+        case 'Int8List':
+        case 'Int16List':
+        case 'Int32List':
+        case 'Int64List':
+        case 'UInt8List':
+        case 'UInt16List':
+        case 'UInt32List':
+        case 'UInt64List':
+        case 'Float32List':
+        case 'Float64List':
+        case 'TextList':
+        case 'DataList':
+        case 'AnyPointerList':
+        case 'FirstEnumList':
+        case 'SecondEnumList':
+        case 'FirstStructList':
+        case 'SecondStructList':
+            return true;
+        default:
+            return false;
         }
     }
 
-    return '('+output.join(', ')+')';
+    function value(f) {
+        switch (f.type) {
+        case 'Void':
+            return 'void';
+
+        case 'Bool':
+        case 'Int8':
+        case 'Int16':
+        case 'Int32':
+        case 'UInt8':
+        case 'UInt16':
+        case 'UInt32':
+        case 'Float32':
+        case 'Float64':
+            return f.value;
+
+        case 'Int64':
+        case 'UInt64':
+            return join64bit(f.value);
+
+        case 'Text':
+        case 'Data':
+            return '"'+f.value+'"';
+
+        case 'AnyPointer':
+            throw new Error('Need AnyPointer support');
+
+        case 'FirstEnum':
+        case 'SecondEnum':
+            return invEnum[f.value];
+
+        case 'Group':
+        case 'FirstStruct':
+        case 'SecondStruct':
+        case 'UpgradeSecondStruct':
+        case 'SecondEnumWrap':
+        case 'VoidWrap':
+        case 'BoolWrap':
+        case 'Int8Wrap':
+        case 'Int16Wrap':
+        case 'Int32Wrap':
+        case 'Int64Wrap':
+        case 'UInt8Wrap':
+        case 'UInt16Wrap':
+        case 'UInt32Wrap':
+        case 'UInt64Wrap':
+        case 'Float32Wrap':
+        case 'Float64Wrap':
+        case 'UpgradeData':
+        case 'UpgradeText':
+            return toolInput(f.value);
+
+        case 'VoidList':
+        case 'BoolList':
+        case 'Int8List':
+        case 'Int16List':
+        case 'Int32List':
+        case 'Int64List':
+        case 'UInt8List':
+        case 'UInt16List':
+        case 'UInt32List':
+        case 'UInt64List':
+        case 'Float32List':
+        case 'Float64List':
+        case 'TextList':
+        case 'DataList':
+        case 'AnyPointerList':
+        case 'FirstEnumList':
+        case 'SecondEnumList':
+        case 'FirstStructList':
+        case 'SecondStructList':
+        case 'UpgradeSecondStructList':
+        case 'SecondEnumWrapList':
+        case 'VoidWrapList':
+        case 'BoolWrapList':
+        case 'Int8WrapList':
+        case 'Int16WrapList':
+        case 'Int32WrapList':
+        case 'Int64WrapList':
+        case 'UInt8WrapList':
+        case 'UInt16WrapList':
+        case 'UInt32WrapList':
+        case 'UInt64WrapList':
+        case 'Float32WrapList':
+        case 'Float64WrapList':
+        case 'UpgradeDataList':
+        case 'UpgradeTextList':
+            return '[' + f.value.map(value).join(', ') + ']';
+
+        default:
+            throw new Error('Unhandled input value: ' + f.type);
+        }
+    }
+
+    var output = [];
+    for (var k in struct) {
+        var f = struct[k];
+        if (!isPointer(f) || f.value !== null)
+            output.push(k+' = '+value(f));
+    }
+
+    return '(' + output.join(', ') + ')';
 };
 
 describe('Message reading', function () {
@@ -115,74 +214,183 @@ describe('Message reading', function () {
      */
     it ('should reproduce the message writer\'s inputs', function (done) {
         encode(toolInput(second), 'SecondStruct')
-            .done(
-                function (result) {
-                    var root = nonframed.toArena(result).getRoot(reader.SecondStruct);
-                    fixture.secondValidate(root, second);
-                    fixture.secondValidate(root.getStructField(), second.structField);
-                    fixture.secondValidate(root.getStructList().get(0), second.structList[0]);
-                    fixture.secondValidate(root.getStructList().get(1), second.structList[1]);
-                    done();
-                },
-                function (err) {
-                    assert(0, err);
-                    done();
-                }
-            );
+            .done(function (result) {
+                var root = nonframed.toArena(result).getRoot(reader.SecondStruct);
+                fixture.validate(root, second);
+                done();
+            });
     });
 });
 
-var toolOutput= function (obj) {
-    function datum(key, value) {
-        if (value === null) return null;
+// map obj from capnp.peg to parallel the spec object (leafy)
+var toolOutput= function (spec, obj) {
+    function stripList (name) {
+        if (name.slice(name.length-4) !== 'List')
+            throw new Error(name + ' does not have a trailing `List`');
 
-        key = key.toLowerCase();
-        var i;
-        if (key.search('uint64') >= 0) {
-            i = new Int64(value);
-            return [i.high32(), i.low32()];
-        } else if (key.search('int64') >= 0) {
-            i = new Int64(value);
-            return [i.high32()|0, i.low32()];
-        } else if (key.search('data') >= 0)
-            return new Buffer(value);
-        else if (key.search('float') >= 0)
-            return parseFloat(value);
-        else if(key.search('int') >= 0)
-            return parseInt(value);
-        else if (key.search('struct') >= 0)
-            return toolOutput(value);
-        else
-            return value;
+        return name.slice(0, name.length-4);
+    }
+
+    function int64(value) {
+        var i = new Int64(value);
+        return [i.high32()|0, i.low32()];
+    }
+
+    function uint64(value) {
+        var i = new Int64(value);
+        return [i.high32(), i.low32()];
+    }
+
+    function field(spec, value) {
+        var type = spec.type;
+        switch (type) {
+        case 'Void':
+            return fixture.leaf(type, null);
+
+        case 'Bool':
+            return fixture.leaf(type, !!value);
+
+        case 'Int8':
+        case 'Int16':
+        case 'Int32':
+        case 'UInt8':
+        case 'UInt16':
+        case 'UInt32':
+            return fixture.leaf(type, parseInt(value));
+
+        case 'Float32':
+        case 'Float64':
+            return fixture.leaf(type, parseFloat(value));
+
+        case 'Text':
+            return fixture.leaf(type, value);
+
+        case 'Data':
+            if (value instanceof Buffer) return fixture.leaf(type, value);
+
+            return fixture.leaf(type, new Buffer(value));
+
+        case 'Int64':
+            return fixture.leaf(type, int64(value));
+
+        case 'UInt64':
+            return fixture.leaf(type, uint64(value));
+
+        case 'AnyPointer':
+            throw new Error('Need AnyPointer support');
+
+        case 'SecondEnum':
+            return fixture.leaf(type, invInvEnum[value]);
+
+        case 'Group':
+        case 'SecondStruct':
+        case 'UpgradeSecondStruct':
+        case 'SecondEnumWrap':
+        case 'VoidWrap':
+        case 'BoolWrap':
+        case 'Int8Wrap':
+        case 'Int16Wrap':
+        case 'Int32Wrap':
+        case 'Int64Wrap':
+        case 'UInt8Wrap':
+        case 'UInt16Wrap':
+        case 'UInt32Wrap':
+        case 'UInt64Wrap':
+        case 'Float32Wrap':
+        case 'Float64Wrap':
+        case 'UpgradeData':
+        case 'UpgradeText':
+            return fixture.leaf(type, toolOutput(spec.value, value));
+
+        case 'VoidList':
+            return fixture.leaf(type, value.map(function (v) {
+                return fixture.leaf('Void', null);
+            }));
+
+        case 'BoolList':
+            return fixture.leaf(type, value.map(function (v) {
+                return fixture.leaf('Bool', !!v);
+            }));
+
+        case 'Int8List':
+        case 'Int16List':
+        case 'Int32List':
+        case 'UInt8List':
+        case 'UInt16List':
+        case 'UInt32List':
+            return fixture.leaf(type, value.map(function (v) {
+                return fixture.leaf(stripList(type), parseInt(v));
+            }));
+
+        case 'Float32List':
+        case 'Float64List':
+            return fixture.leaf(type, value.map(function (v) {
+                return fixture.leaf(stripList(type), parseFloat(v));
+            }));
+
+        case 'Int64List':
+            return fixture.leaf(type, value.map(function (v) {
+                return fixture.leaf('Int64', int64(v));
+            }));
+
+        case 'UInt64List':
+            return fixture.leaf(type, value.map(function (v) {
+                return fixture.leaf('UInt64', uint64(v));
+            }));
+
+        case 'DataList':
+            return fixture.leaf(type, value.map(function (v) {
+                if (v instanceof Buffer)
+                    return fixture.leaf('Data', v);
+                else
+                    return fixture.leaf('Data', new Buffer(v));
+            }));
+
+        case 'TextList':
+            return fixture.leaf(type, value.map(function (v) {
+                return fixture.leaf(stripList(type), v);
+            }));
+
+        case 'AnyPointerList':
+            if (spec.value.length === 0) return fixture.leaf(type, []);
+
+            throw new Error('Need AnyPointer support');
+
+        case 'SecondEnumList':
+            return fixture.leaf(type, value.map(function (v) {
+                return fixture.leaf('SecondEnum', invInvEnum[v]);
+            }));
+
+        case 'SecondStructList':
+        case 'UpgradeSecondStructList':
+        case 'SecondEnumWrapList':
+        case 'VoidWrapList':
+        case 'BoolWrapList':
+        case 'Int8WrapList':
+        case 'Int16WrapList':
+        case 'Int32WrapList':
+        case 'Int64WrapList':
+        case 'UInt8WrapList':
+        case 'UInt16WrapList':
+        case 'UInt32WrapList':
+        case 'UInt64WrapList':
+        case 'Float32WrapList':
+        case 'Float64WrapList':
+        case 'UpgradeDataList':
+        case 'UpgradeTextList':
+            return fixture.leaf(type, value.map(function (v) {
+                return fixture.leaf(stripList(type), toolOutput(spec.value, v));
+            }));
+
+        default:
+            throw new Error('Unhandled output value: ' + type);
+        }
     }
 
     var output = {};
     for (var k in obj) {
-        if (k.slice(k.length-4) === 'List') {
-            var ell=[];
-            switch (k) {
-            case 'enumList':
-            case 'addedEnumList':
-                output[k] = obj[k].map(function (e) { return invInvEnum[e]; });
-                break;
-            default:
-                for (var i=0; i<obj[k].length; ++i) {
-                    ell.push(datum(k, obj[k][i]));
-                }
-                output[k] = ell;
-            }
-        } else if (k.slice(k.length-5) === 'Field') {
-            switch (k) {
-            case 'enumField':
-            case 'addedEnumField':
-                output[k] = invInvEnum[obj[k]];
-                break;
-            default:
-                output[k] = datum(k, obj[k]);
-            }
-        } else {
-            throw new Error('Unrecognized key: '+k);
-        }
+        if (spec[k] !== undefined)
+            output[k] = field(spec[k], obj[k]);
     }
 
     return output;
@@ -199,27 +407,12 @@ describe ('Message writing', function () {
      */
     it ('should produce messages that external readers understand', function (done) {
         var root = alloc.createArena().initRoot(builder.SecondStruct);
-
-        fixture.secondInject(root, fixture.secondRoot);
-        fixture.secondInject(root.getStructField(), second.structField);
-
-        var ell = root.initStructList(2);
-        fixture.secondInject(ell.get(0), second.structList[0]);
-        fixture.secondInject(ell.get(1), second.structList[1]);
-
+        fixture.inject(root, second);
         decode(nonframed.fromStruct(root), 'SecondStruct')
-            .done(
-                function (result) {
-                    result = toolOutput(result);
-                    fixture.secondValidate(root, result);
-                    fixture.secondValidate(root.getStructField(), result.structField);
-                    fixture.secondValidate(root.getStructList().get(0), result.structList[0]);
-                    fixture.secondValidate(root.getStructList().get(1), result.structList[1]);
-                    done();
-                },
-                function (err) {
-                    done();
-                }
-            );
+            .done(function (result) {
+                result = toolOutput(second, result);
+                fixture.validate(root, result);
+                done();
+            });
     });
 });

@@ -10,43 +10,34 @@ var layout = require('../../node/reader/layout/any');
 
 var alloc = new Allocator();
 
-// Implement 0.5 spec to make this much easier.
-describe ('Stale datum field', function () {
-    it ('should have tests', function () { assert(0); });
-});
-
-describe ('Fresher than compile-time datum field', function () {
-    // Upgraded to struct
-    it ('should have tests', function () { assert(0); });
-});
-
 describe ('Stale Struct field', function () {
     var sArena = alloc.createArena();
-    var root = fixture.firstInject(
+    var root = fixture.inject(
         sArena.initRoot(builder.FirstStruct),
-        fixture.firstRoot
+        fixture.first
     );
-    var sf = fixture.firstInject(root.getStructField(), fixture.firstSf);
-    fixture.firstValidate(root, fixture.firstRoot);
-    fixture.firstValidate(root.getStructField(), fixture.firstSf);
+    fixture.validate(root, fixture.first);
 
     var staleRoot = sArena.asReader().getRoot(reader.SecondStruct);
-    var staleSf = staleRoot.getStructField();
 
     it ('should read default values from missing fields', function () {
-        fixture.secondValidate(
-            staleRoot,
-            ramda.mixin(fixture.secondDefaults, fixture.firstRoot)
+        var diff = ramda.omit(
+            Object.keys(fixture.firstDefaults),
+            fixture.secondDefaults
         );
-        fixture.secondValidate(
-            staleSf,
-            ramda.mixin(fixture.secondDefaults, fixture.firstSf)
+
+        fixture.validate(
+            staleRoot,
+            ramda.mixin(diff, fixture.priorize({
+                structField : fixture.leaf('SecondStruct', diff)
+            }))
         );
     });
 
     it ('should set into a parent without growing', function () {
         var parent = alloc.createArena().initRoot(builder.SecondStruct);
-        parent.setStructField(staleSf);
+        var staleLeaf = staleRoot.getStructField().getPrior();
+        parent.getStructField().setPrior(staleLeaf);
         var ell = layout.unsafe(parent._arena, {
             segment : parent._segment,
             position : parent._pointersSection+16
@@ -54,24 +45,37 @@ describe ('Stale Struct field', function () {
         assert.strictEqual(ell.meta, 0);
         assert.strictEqual(
             ell.end - ell.dataSection,
-            staleSf._layout().end - staleSf._layout().dataSection
+            staleLeaf._layout().end - staleLeaf._layout().dataSection
         );
     });
 
     it ('should grow to compile-time size on a builder\'s first access', function () {
         var parent = alloc.createArena().initRoot(builder.SecondStruct);
-        parent.setStructField(staleSf);
-        var freshened = parent.getStructField();
+        parent.getStructField().setPrior(staleRoot);
+        var freshened = parent.getStructField().getPrior();
         assert.strictEqual(
             freshened._layout().end - freshened._layout().dataSection,
             builder.SecondStruct._CT.dataBytes + builder.SecondStruct._CT.pointersBytes
+        );
+        fixture.validate(
+            freshened,
+            ramda.mixin(
+                ramda.pick(Object.keys(fixture.first), fixture.second),
+                fixture.priorize({
+                    structField : fixture.leaf('SecondStruct', ramda.pick(
+                        Object.keys(fixture.first.structField.value),
+                        fixture.second.structField.value.prior.value
+                    ))
+                })
+            )
         );
     });
 
     it ('should grow to compile-time size on disown', function () {
         var parent = alloc.createArena().initRoot(builder.SecondStruct);
-        parent.setStructField(staleSf);
-        var freshened = parent.disownStructField();
+        var staleLeaf = staleRoot.getStructField().getPrior();
+        parent.getStructField().setPrior(staleLeaf);
+        var freshened = parent.getStructField().disownPrior();
         assert.strictEqual(
             freshened._layout().end - freshened._layout().dataSection,
             builder.SecondStruct._CT.dataBytes + builder.SecondStruct._CT.pointersBytes
@@ -79,88 +83,67 @@ describe ('Stale Struct field', function () {
     });
 });
 
-describe ('Fresher than compile-time Struct field', function () {
+describe ('Fresher than compile-time field', function () {
     var sArena = alloc.createArena();
-    var root = fixture.secondInject(
+    var root = fixture.inject(
         sArena.initRoot(builder.SecondStruct),
-        fixture.secondRoot
+        fixture.second
     );
-    var sf = fixture.secondInject(root.getStructField(), fixture.secondSf);
-    fixture.secondValidate(root, fixture.secondRoot);
-    fixture.secondValidate(root.getStructField(), fixture.secondSf);
+    fixture.validate(root, fixture.second);
 
     var freshRoot = sArena.asReader().getRoot(reader.FirstStruct);
-    var freshSf = freshRoot.getStructField();
+    var freshLeaf = freshRoot.getStructField();
+
+    it ('should set into an arena without truncating', function () {
+        var arena = alloc.createArena();
+        arena.setRoot(freshRoot);
+        var image = arena.asReader().getRoot(reader.SecondStruct);
+
+        assert.strictEqual(
+            freshLeaf._layout().end - freshLeaf._layout().dataSection,
+            reader.SecondStruct._CT.dataBytes + reader.SecondStruct._CT.pointersBytes
+        );
+        fixture.validate(image, fixture.second);
+    });
 
     it ('should set into a parent without truncating', function () {
-        var parent = alloc.createArena().initRoot(builder.FirstStruct);
-        parent.setStructField(freshSf);
-        var ell = layout.unsafe(parent._arena, {
-            segment : parent._segment,
-            position : parent._pointersSection+16
-        });
-        assert.strictEqual(ell.meta, 0);
-        assert.strictEqual(
-            ell.end - ell.dataSection,
-            sf._layout().end - sf._layout().dataSection
-        );
+        var arena = alloc.createArena();
+        var parent = arena.initRoot(builder.FirstStruct);
 
+        parent.setStructField(freshRoot);
+        fixture.validate(
+            arena.getRoot(builder.SecondStruct).getStructField().getPrior(),
+            fixture.second
+        );
+        fixture.validate(
+            arena.asReader().getRoot(reader.SecondStruct).getStructField().getPrior(),
+            fixture.second
+        );
     });
 
     it ('should not get truncated on a builder\'s first access', function () {
         var parent = alloc.createArena().initRoot(builder.FirstStruct);
-        parent.setStructField(freshSf);
+        parent.setStructField(freshLeaf);
         var child = parent.getStructField();
         assert.strictEqual(
             child._layout().end - child._layout().dataSection,
-            sf._layout().end - sf._layout().dataSection
+            reader.SecondStruct._CT.dataBytes + reader.SecondStruct._CT.pointersBytes
         );
     });
 
     it ('should not get truncated on disown', function () {
         var parent = alloc.createArena().initRoot(builder.FirstStruct);
-        parent.setStructField(freshSf);
+        parent.setStructField(freshLeaf);
         var child = parent.disownStructField();
         assert.strictEqual(
             child._layout().end - child._layout().dataSection,
-            sf._layout().end - sf._layout().dataSection
+            reader.SecondStruct._CT.dataBytes + reader.SecondStruct._CT.pointersBytes
         );
     });
 });
 
-// Implement 0.5 spec to make this much easier.
-describe ('Stale Text field', function () {
-    it ('should have tests', function () { assert(0); });
-});
-
-describe ('Fresher than compile-time Text field', function () {
-    // Upgraded to struct
-    it ('should have tests', function () { assert(0); });
-});
-
-describe ('Stale Data field', function () {
-    it ('should have tests', function () { assert(0); });
-});
-
-describe ('Fresher than compile-time Data field', function () {
-    // Upgraded to struct
-    it ('should have tests', function () { assert(0); });
-});
-
-describe ('Stale List field', function () {
-    it ('should have tests', function () { assert(0); });
-});
-
-describe ('Fresher than compile-time List field', function () {
-    // Upgraded to struct
-    it ('should have tests', function () { assert(0); });
-});
-
 describe ('Stale AnyPointer field', function () {
-    it ('should have tests', function () { assert(0); });
-});
-
-describe ('Fresher than compile-time AnyPointer field', function () {
-    // Upgraded to struct
-    it ('should have tests', function () { assert(0); });
+    it ('should have tests', function () {
+        assert(0);
+    });
 });
