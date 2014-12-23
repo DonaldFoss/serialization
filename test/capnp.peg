@@ -24,6 +24,7 @@ value
   / object
   / array
   / number
+  / bytestring
   / string
   / identifier
 
@@ -84,6 +85,14 @@ int = zero / (digit1_9 DIGIT*)
 minus = "-"
 plus = "+"
 zero = "0"
+
+/* ----- Hex Strings ('+' on group implies use empty text string as default for vacuous cases) ----- */
+
+bytestring "bytestring"
+  = quotation_mark hexes:(escape 'x' HEXDIG HEXDIG)+ quotation_mark
+  {
+    return new Buffer(hexes.map(function (hex) { return hex[2]+hex[3]; }));
+  }
 
 /* ----- Strings ----- */
 
