@@ -2,4 +2,5 @@
  * Parametric types
  * Downgrading (Downgrade to bool type => n.g.?)
  * AnyPointer fields + casting
+ * Union handling
  */
