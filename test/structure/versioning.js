@@ -141,9 +141,3 @@ describe ('Fresher than compile-time field', function () {
         );
     });
 });
-
-describe ('Stale AnyPointer field', function () {
-    it ('should have tests', function () {
-        assert(0);
-    });
-});
