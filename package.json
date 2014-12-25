@@ -22,7 +22,7 @@
     "build": "gulp build",
     "schema": "mkdir -p tmp && capnp compile -ojs:tmp --src-prefix=test test/testing.capnp",
     "testing-capnp": "npm run schema && nfy --output=test/testing.capnp.d --src-prefix=tmp/testing.capnp.d/ tmp/testing.capnp.d/*.js",
-    "test": "npm run testing-capnp && mocha test/structure test/list",
+    "test": "npm run build && npm run testing-capnp && mocha test/structure test/list",
     "test-debug": "mocha --debug-brk test/structure test/list & node-inspector & wait"
   },
   "repository": {
