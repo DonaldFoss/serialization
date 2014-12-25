@@ -1,6 +1,6 @@
 {
   "name": "capnp-js",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Capnproto run-time decoding and encoding for Node",
   "main": "index.js",
   "scripts": {
@@ -8,10 +8,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/popham/capnp-js-node.git"
+    "url": "https://github.com/popham/capnp-js-base.git"
   },
   "keywords": [
-    "capnproto", 
+    "capnproto",
     "capnp",
     "capnpc",
     "pack",
@@ -21,7 +21,7 @@
   "author": "Tim Popham",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/popham/capnp-js-node/issues"
+    "url": "https://github.com/popham/capnp-js-base/issues"
   },
-  "homepage": "https://github.com/popham/capnp-js-node"
+  "homepage": "https://github.com/popham/capnp-js-base"
 }
