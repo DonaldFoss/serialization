@@ -9,3 +9,4 @@ before_install:
   - sudo apt-get autoremove -y
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 50
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 50
+  - sudo npm install -g capnp-js-plugin
