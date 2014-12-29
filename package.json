@@ -1,6 +1,6 @@
 {
   "name": "capnp-js-base",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Capnproto run-time decoding and encoding",
   "devDependencies": {
     "buffers": "^0.1.1",
