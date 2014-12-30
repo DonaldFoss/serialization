@@ -17,8 +17,11 @@ The following interacts with code generated from [peer.capnp](https://github.com
 To play around with it under Node, clone the parent project:
 
 ```
-git clone https://github.com/popham/rtc-github-protocol-node.git
-cd rtc-github-protocol-node
+git clone https://github.com/popham/rtc-github-protocol.git
+cd rtc-github-protocol
+npm install
+npm run build
+cd node
 npm install
 ```
 
