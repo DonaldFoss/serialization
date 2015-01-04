@@ -110,7 +110,7 @@ Capnproto specifies [stream framing](http://kentonv.github.io/capnproto/encoding
 I've added a simple, non-framed analogue.
 
 * Stream Framing - I don't care for my stream framing interface.
-  Expect it to change--in fact, feel free to complain in the issue tracker with use cases that can drive a better implementation.
+  Expect it to change--in fact, feel free to complain in the issue tracker with use cases that can drive a better API.
   In the meantime, the following works.
 
 ```
