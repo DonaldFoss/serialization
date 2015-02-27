@@ -30,7 +30,7 @@ First, lets build a few messages.
 
 * Root-up
 
-```
+```javascript
 var Allocator = require('capnp-js/builder/Allocator');
 var alloc = new Allocator();
 var client = require('./client.capnp.d/builders');
@@ -43,7 +43,7 @@ rootUpPeer.initAnswer().setSdp('Hello from Root Up');
 
 * Child-down
 
-```
+```javascript
 var Allocator = require('capnp-js/builder/Allocator');
 var alloc = new Allocator();
 var client = require('./client.capnp.d/builders');
@@ -60,7 +60,7 @@ childDownClient.adoptPeer(childDownPeer);
 
 * Copy
 
-```
+```javascript
 var Allocator = require('capnp-js/builder/Allocator');
 var alloc = new Allocator();
 var client = require('./client.capnp.d/builders');
@@ -76,7 +76,7 @@ copyClient2.setPeer(copyPeer1);
 
 * Move within an arena
 
-```
+```javascript
 var Allocator = require('capnp-js/builder/Allocator');
 var alloc = new Allocator();
 var client = require('./client.capnp.d/builders');
@@ -113,7 +113,7 @@ I've added a simple, non-framed analogue.
   Expect it to change--in fact, feel free to complain in the issue tracker with use cases that can drive a better API.
   In the meantime, the following works.
 
-```
+```javascript
 var stream = require('capnp-js/stream');
 
 var rootUpStream = stream.fromStruct(rootUpClient);
@@ -133,7 +133,7 @@ var moveClientStreamArena = stream.toArena(moveStream);
 
 * Non-Framed - The nonframed interface consolidates a full arena to a single segment.
 
-```
+```javascript
 var nonframed = require('capnp-js/nonframed');
 
 var rootUpNonframed = nonframed.fromStruct(rootUpClient);
@@ -156,7 +156,7 @@ Finally, lets wrap readers around the cloned arenas.
 
 * Stream Framing
 
-```
+```javascript
 var sfRootUpClientClone = rootUpClientStreamArena.getRoot(client.Client);
 var sfChildDownClientClone = childDownClientStreamArena.getRoot(client.Client);
 var sfCopyClient1Clone = copyClient1StreamArena.getRoot(client.Client);
@@ -166,7 +166,7 @@ var sfMoveClientClone = moveClientStreamArena.getRoot(client.Client);
 
 * Non-Framed
 
-```
+```javascript
 var nfRootUpClientClone = rootUpClientNonframedArena.getRoot(client.Client);
 var nfChildDownClientClone = childDownClientNonframedArena.getRoot(client.Client);
 var nfCopyClient1Clone = copyClient1NonframedArena.getRoot(client.Client);
